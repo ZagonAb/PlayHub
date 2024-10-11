@@ -27,13 +27,13 @@ FocusScope {
     SoundEffect {
         id: naviSound
         source: "assets/audio/Collec.wav"
-        volume: 2.5
+        volume: 0.2
     }
 
     SoundEffect {
         id: gameSound
         source: "assets/audio/Games.wav"
-        volume: 2.5
+        volume: 0.2
     }
 
     Item {
