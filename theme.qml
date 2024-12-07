@@ -8,6 +8,8 @@ FocusScope {
     id: root
     focus: true
 
+    property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
+
     SoundEffect {
         id: naviSound
         source: "assets/audio/Collec.wav"
@@ -516,10 +518,21 @@ FocusScope {
                 height: 1
                 color: "transparent"
             }
+
             Row {
                 spacing: 5
+                Timer {
+                    id: clockTimer
+                    interval: 1000
+                    running: true
+                    repeat: true
+                    onTriggered: {
+                        currentTime = Qt.formatDateTime(new Date(), "dd-MM HH:mm")
+                    }
+                }
+
                 Text {
-                    text: Qt.formatDateTime(new Date(), "dd-MM HH:mm ")
+                    text: currentTime
                     color: "black"
                     font.bold: true
                     font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
