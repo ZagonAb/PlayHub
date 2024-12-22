@@ -6,8 +6,27 @@
 
 - En la parte inferior de la pantalla, una barra de información proporciona detalles relevantes del juego seleccionado, como la última vez que se jugó (lastplayed), el tiempo total de juego (playTime), la cantidad de juegos en la colección actual, así como la fecha y hora actuales.
 
-# Mejoras y Arreglos
- - Se implementó una corrección en la actualización de la hora. Ahora el reloj se actualiza correctamente cada segundo mediante un Timer.
+ 
+ <details>
+<summary>Cambios y mejoras recientes en el Tema 12/24</summary> 
+  <br>
+  
+<details>
+<summary>Mejoras en reloj</summary>
+
+- Se implementó una corrección en la actualización de la hora. Ahora el reloj se actualiza correctamente cada segundo mediante un Timer.
+</details>
+
+<details>
+<summary>Cambio en apariencia **temas de colores**</summary>
+
+- Se ha implementado un sencillo menú para la selección de tres tipos distintos de temas de color: **WHITE AND BLACK** (el tema predeterminado), **DARK BREEZE** y **BREEZE**. Esta implementación se basa en los temas predeterminados y sus colores principales de **KDE Neon**. Además, utilizando api.memory, la interfaz guardará y restaurará el tema seleccionado al volver a abrirla."
+
+![DEMO](https://github.com/user-attachments/assets/17f339a9-8b3a-4fd7-92b9-dc276fc2fff4)
+
+</details>
+
+</details>
  
 # DEMO GIF
 ![DEMO](https://github.com/user-attachments/assets/17f339a9-8b3a-4fd7-92b9-dc276fc2fff4)
