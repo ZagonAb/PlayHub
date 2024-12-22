@@ -33,9 +33,9 @@
 
 # Screenshots
 
-![screenshots0](https://github.com/user-attachments/assets/593f5508-3228-4a55-85cf-dbdedf67df0a)
-![screenshots1](https://github.com/user-attachments/assets/38a2cba1-7659-4f0c-b2ec-62a327674927)
-![screenshots2](https://github.com/user-attachments/assets/0aee221c-3cf4-47bd-bb2d-bd417de0681a)
+![screenshots0](https://github.com/ZagonAb/PlayHub/blob/5650a71862d1acf84eafc105ff0e2864ae905fee/.meta/screenshots/screenshots1.png)
+![screenshots1](https://github.com/ZagonAb/PlayHub/blob/5650a71862d1acf84eafc105ff0e2864ae905fee/.meta/screenshots/screenshots2.png)
+![screenshots2](https://github.com/ZagonAb/PlayHub/blob/5650a71862d1acf84eafc105ff0e2864ae905fee/.meta/screenshots/screenshots3.png)
 
 # Licencia
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"></a>
