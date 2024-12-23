@@ -23,7 +23,12 @@
 - Se ha implementado un sencillo menú para la selección de tres tipos distintos de temas de color: **WHITE AND BLACK** (el tema predeterminado), **DARK BREEZE** y **BREEZE**. Esta implementación se basa en los temas predeterminados y sus colores principales de **KDE Neon**. Además, utilizando api.memory, la interfaz guardará y restaurará el tema seleccionado al volver a abrirla."
 
 ![themes](https://github.com/ZagonAb/PlayHub/blob/56a62b0b191fd0ecd72d68480cd597c79a48d16f/.meta/screenshots/colors.png)
+</details>
 
+<details>
+<summary>Experiencia Mejorada: Animaciones y Nuevos Efectos de Sonido</summary>
+
+- Los efectos de sonido han sido renovados, y se ha añadido una animación especial para el lanzamiento del juego seleccionado.
 </details>
 
 </details>

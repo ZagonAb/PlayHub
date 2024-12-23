@@ -9,8 +9,10 @@ import QtQuick.Particles 2.15
 FocusScope {
     id: root
     focus: true
+
     property bool settingsIconSelected: false
     property bool settingsIconFocused: false
+    property bool isMinimizing: false
     property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
     property var currentTheme: themes.blackAndWhite
 
@@ -65,23 +67,60 @@ FocusScope {
         }
     }
 
-    Component.onCompleted: {
-        const savedTheme = api.memory.get('selectedTheme');
-        if (savedTheme) {
-            applyTheme(savedTheme);
+    Timer {
+        id: launchTimer
+        interval: 700
+        repeat: false
+        onTriggered: {
+            var selectedGame = gameGridView.model.get(gameGridView.currentIndex);
+            var collectionName = getNameCollecForGame(selectedGame);
+            for (var i = 0; i < api.collections.count; ++i) {
+                var collection = api.collections.get(i);
+                if (collection.name === collectionName) {
+                    for (var j = 0; j < collection.games.count; ++j) {
+                        var game = collection.games.get(j);
+                        if (game.title === selectedGame.title) {
+                            game.launch();
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            root.isMinimizing = false;
         }
     }
 
     SoundEffect {
         id: naviSound
-        source: "assets/audio/Collec.wav"
-        volume: 0.2
+        source: "assets/audio/choose.wav"
+        volume: 0.8
     }
 
     SoundEffect {
-        id: gameSound
-        source: "assets/audio/Games.wav"
-        volume: 0.2
+        id: backSound
+        source: "assets/audio/back.wav"
+        volume: 0.5
+    }
+
+    SoundEffect {
+        id: goSound
+        source: "assets/audio/go.wav"
+        volume: 0.5
+    }
+
+    SoundEffect {
+        id: launchSound
+        source: "assets/audio/launch.wav"
+        volume: 1.0
+    }
+
+    Component.onCompleted: {
+        const savedTheme = api.memory.get('selectedTheme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        }
+        naviSound.play();
     }
 
     Item {
@@ -207,7 +246,8 @@ FocusScope {
                 id: gradientOverlay
                 anchors.top: collectionListView.top
                 anchors.bottom: collectionListView.bottom
-                anchors.left: settingsImage.right
+                anchors.left: collectionListView.left
+
                 width: root.width * 0.015
                 z: 2
 
@@ -271,7 +311,7 @@ FocusScope {
                     settingsIconSelected = true;
                     colorListView.focus = true;
                     colorListView.currentIndex = 0;
-                    naviSound.play();
+                    goSound.play();
                 } else if (collectionListView.currentIndex > 0) {
                     collectionListView.currentIndex -= 1;
                     naviSound.play();
@@ -304,7 +344,7 @@ FocusScope {
                 var currentIndex = gameGridView.currentIndex;
                 gameGridView.currentIndex = -1;
                 gameGridView.currentIndex = currentIndex;
-                gameSound.play();
+                goSound.play();
             }
         }
 
@@ -396,7 +436,7 @@ FocusScope {
                             settingsIconSelected = false;
                             settingsIconFocused = false;
                             collectionListView.focus = true;
-                            naviSound.play();
+                            backSound.play();
                         }
                     }
                 }
@@ -407,6 +447,10 @@ FocusScope {
             id: gameGridView
             model: api.collections.get(0).games
             property int indexToPosition: -1
+            property real selectedItemX: 0
+            property real selectedItemY: 0
+            property real viewportX: contentX + width / 2
+            property real viewportY: contentY + height / 2
             anchors {
                 top: collectionListView.bottom
                 topMargin: 10
@@ -422,6 +466,37 @@ FocusScope {
             clip: true
             visible: !settingsIconSelected
 
+            transform: [
+                Scale {
+                    id: viewScale
+                    origin.x: gameGridView.selectedItemX
+                    origin.y: gameGridView.selectedItemY
+                    xScale: root.isMinimizing ? 8.0 : 1.0
+                    yScale: root.isMinimizing ? 8.0 : 1.0
+
+                    Behavior on xScale {
+                        NumberAnimation {
+                            duration: launchTimer.interval
+                            easing.type: Easing.InQuad
+                        }
+                    }
+                    Behavior on yScale {
+                        NumberAnimation {
+                            duration: launchTimer.interval
+                            easing.type: Easing.InQuad
+                        }
+                    }
+                }
+            ]
+
+            opacity: root.isMinimizing ? 0 : 1
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: launchTimer.interval
+                    easing.type: Easing.InQuad
+                }
+            }
+
             delegate: Rectangle {
                 id: rectanglegridview
                 property bool isSelected: GridView.isCurrentItem
@@ -432,6 +507,16 @@ FocusScope {
                 border.width: 2
                 color: isSelected && gameGridView.focus ? currentTheme.primary : currentTheme.secondary
                 border.color: currentTheme.gridviewborder
+
+                function updateOriginPoint() {
+                    if (isSelected && boxfront.status === Image.Ready) {
+                        var boxfrontItem = boxfront;
+                        var boxfrontCenter = boxfrontItem.mapToItem(null,
+                                                                    boxfrontItem.width * boxfrontItem.scale / 2,
+                                                                    boxfrontItem.height * boxfrontItem.scale / 2);
+                    }
+                }
+
                 Item {
                     width: parent.width
                     height: parent.height
@@ -448,7 +533,7 @@ FocusScope {
                             color: "transparent"
                             clip: true
 
-                            Item{
+                            Item {
                                 anchors.fill: parent
 
                                 Image {
@@ -457,42 +542,65 @@ FocusScope {
                                     source: model.assets.boxFront
                                     fillMode: Image.PreserveAspectFit
                                     asynchronous: true
-                                    width: parent.width
-                                    height: parent.height
+                                    width: parent.width * 0.93
+                                    height: parent.height * 0.93
                                     anchors.centerIn: parent
                                     scale: isSelected && gameGridView.focus ? 1.05 : 1.0
-                                    Behavior on scale { NumberAnimation { duration: 150} }
+
+                                    Behavior on scale {
+                                        NumberAnimation {
+                                            duration: 150
+                                            onRunningChanged: {
+                                                if (!running && isSelected) {
+                                                    rectanglegridview.updateOriginPoint();
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    onStatusChanged: {
+                                        if (status === Image.Ready && isSelected) {
+                                            rectanglegridview.updateOriginPoint();
+                                        }
+                                    }
                                     mipmap: true
+                                    layer.enabled: isSelected
+                                    layer.effect: Glow {
+                                        samples: 100
+                                        color: currentTheme.background
+                                        spread: 0.5
+                                        radius: 15
+                                    }
                                 }
 
                                 Image {
                                     id: favoriteIcon
                                     visible: model.favorite && boxfront.status === Image.Ready
                                     source: "assets/favorite/favorite.png"
-                                    width: 55
-                                    height: 72
+                                    width: parent.width * 0.15
+                                    height: parent.height * 0.17
                                     anchors {
                                         top: boxfront.top
                                         right: boxfront.right
-                                        topMargin: (parent.height - boxfront.paintedHeight) / 2
-                                        rightMargin: (parent.width - boxfront.paintedWidth) / 2
+                                        topMargin: (parent.height - boxfront.paintedHeight) / 2.5
+                                        rightMargin: (parent.width - boxfront.paintedWidth) / 2.3
                                     }
-                                    scale: isSelected && gameGridView.focus ? 1.15 : 1.0
+                                    scale: isSelected && gameGridView.focus ? 1.15 : 0.8
                                     Behavior on scale { NumberAnimation { duration: 150 } }
                                     mipmap: true
                                 }
-                            }
 
-                            Image {
-                                id: noImage
-                                visible: boxfront.status !== Image.Ready
-                                source: isSelected && gameGridView.focus ? "assets/no-image/no-image-white.png" : "assets/no-image/no-image-black.png"
-                                anchors.centerIn: parent
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
-                                width: parent.width * 0.60
-                                height: parent.height * 0.60
-                                mipmap: true
+                                Image {
+                                    id: noImage
+                                    visible: boxfront.status !== Image.Ready
+                                    source: isSelected && gameGridView.focus ? "assets/no-image/no-image-white.png" : "assets/no-image/no-image-black.png"
+                                    anchors.centerIn: parent
+                                    fillMode: Image.PreserveAspectFit
+                                    asynchronous: true
+                                    width: parent.width * 0.60
+                                    height: parent.height * 0.60
+                                    mipmap: true
+                                }
                             }
                         }
 
@@ -507,6 +615,20 @@ FocusScope {
                             verticalAlignment: Text.AlignVCenter
                             elide: Text.ElideRight
                         }
+                    }
+                }
+
+                Component.onCompleted: {
+                    if (isSelected) {
+                        updateSelectedItemPosition();
+                    }
+                }
+
+                function updateSelectedItemPosition() {
+                    if (isSelected) {
+                        var itemRect = rectanglegridview.mapToItem(gameGridView, 0, 0, width, height);
+                        gameGridView.selectedItemX = itemRect.x + (itemRect.width / 2);
+                        gameGridView.selectedItemY = itemRect.y + (itemRect.height / 2);
                     }
                 }
             }
@@ -530,32 +652,23 @@ FocusScope {
 
             Keys.onPressed: {
                 if (!event.isAutoRepeat && (event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
-                    gameSound.play();
-                }
-
-                if (!event.isAutoRepeat && api.keys.isAccept(event)) {
-                    event.accepted = true;
-                    var selectedGame = gameGridView.model.get(gameGridView.currentIndex);
-                    var collectionName = getNameCollecForGame(selectedGame);
-                    for (var i = 0; i < api.collections.count; ++i) {
-                        var collection = api.collections.get(i);
-                        if (collection.name === collectionName) {
-                            for (var j = 0; j < collection.games.count; ++j) {
-                                var game = collection.games.get(j);
-                                if (game.title === selectedGame.title) {
-                                    game.launch();
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                } else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
-                    event.accepted = true;
                     naviSound.play();
+                    if (currentItem) {
+                        currentItem.updateSelectedItemPosition();
+                    }
+                }if (!event.isAutoRepeat && api.keys.isAccept(event)) {
+                    event.accepted = true;
+                    if (currentItem) {
+                        currentItem.updateSelectedItemPosition();
+                    }
+                    root.isMinimizing = true;
+                    launchTimer.start();
+                    launchSound.play();
+                }else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
+                    event.accepted = true;
+                    backSound.play();
                     collectionListView.focus = true;
                 }
-
                 if (api.keys.isNextPage(event)) {
                     naviSound.play();
                     collectionListView.incrementCurrentIndex();
@@ -565,7 +678,6 @@ FocusScope {
                     collectionListView.decrementCurrentIndex();
                     collectionListView.focus = true;
                 }
-
                 else if (!event.isAutoRepeat && api.keys.isDetails(event)) {
                     event.accepted = true;
                     favSound.play();
@@ -593,6 +705,10 @@ FocusScope {
                     bottomBar.selectedGame = gameGridView.model.get(gameGridView.currentIndex);
                     indexToPosition = currentIndex;
                     updateGameInfo();
+
+                    if (currentItem) {
+                        currentItem.updateSelectedItemPosition();
+                    }
                 } else {
                     bottomBar.selectedGame = null;
                 }
@@ -906,7 +1022,6 @@ FocusScope {
 
     function updateGameInfo() {
         var game = gameGridView.model.get(gameGridView.currentIndex);
-
         if (game) {
             var totalSeconds = game.playTime || 0;
             var hours = Math.floor(totalSeconds / 3600);
@@ -918,9 +1033,8 @@ FocusScope {
             (seconds < 10 ? "0" : "") + seconds;
             playTimeText.text = "| Play Time: " + playTimeFormatted;
 
-            if (game.lastPlayed.getTime()) {
-                var lastPlayedDate = new Date(game.lastPlayed);
-                var formattedDate = Qt.formatDateTime(lastPlayedDate, "yyyy-MM-dd HH:mm");
+            if (game.lastPlayed) {
+                var formattedDate = Qt.formatDateTime(game.lastPlayed, "yyyy-MM-dd HH:mm");
                 lastPlayedText.text = "| Last Played: " + formattedDate;
             } else {
                 lastPlayedText.text = "| Last Played: N/A";
