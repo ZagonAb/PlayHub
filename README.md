@@ -36,7 +36,7 @@
 
 - Nueva función al presionar "Y" en el gamepad: una vista de detalles se deslizará desde la parte inferior, revelando datos del juego, tales como el título, la calificación, la última vez jugado, el desarrollador, el editor, el género, el año de lanzamiento y el tiempo de juego (oculto si es igual a 0).
 - Cada tema cuenta con su propio overlay para mostrar los detalles del juego, utilizando una captura de pantalla del juego para una vista rápida.
-![DETAILS]()
+![DETAILS](https://github.com/ZagonAb/PlayHub/blob/f2acae250243c1b8e5c14d1149ddbbb7ea7f17b4/.meta/screenshots/Details.png)
 </details>
 
 </details>
