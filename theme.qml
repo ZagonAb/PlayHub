@@ -9,12 +9,16 @@ import QtQuick.Particles 2.15
 FocusScope {
     id: root
     focus: true
-
     property bool settingsIconSelected: false
     property bool settingsIconFocused: false
+    property bool gameInfoFocused: false
+    property bool gameInfoVisible: false
     property bool isMinimizing: false
+    property var game: null
+    property real iconSize: Math.min(height * 0.50, width * 0.02)
     property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
     property var currentTheme: themes.blackAndWhite
+    property string maskImageSource: "assets/overlay/overlay.png"
 
     readonly property var themes: {
         "blackAndWhite": {
@@ -24,32 +28,35 @@ FocusScope {
             text: "black",
             textSelected: "white",
             border: "black",
-            gridviewborder: "#e0e0e0",
+            gridviewborder: "black",
             settingsText: "black",
-            iconColor: "black"
+            iconColor: "black",
+            favoriteiconColor: "#d00003"
         },
         "darkBreeze": {
-            background: "#1a1d1f",
-            primary: "#214f66",
-            secondary: "#1a1d1f",
-            text: "#214f66",
+            background: "#292d32",
+            primary: "#3aa7e0",
+            secondary: "#292d32",
+            text: "#3aa7e0",
             textSelected: "white",
-            border: "#214f66",
-            gridviewborder: "#214f66",
-            settingsText: "#214f66",
-            iconColor: "#214f66"
-
+            border: "#3aa7e0",
+            gridviewborder: "#3aa7e0",
+            settingsText: "#3aa7e0",
+            iconColor: "#3aa7e0",
+            favoriteiconColor: "#3aa7e0"
         },
         "breeze": {
             background: "#eff0f1",
-            primary: "#3baae4",
+            primary: "#3aa7e0",
             secondary: "#eff0f1",
-            text: "#3baae4",
+            text: "#3aa7e0",
+            textgridview: "#3aa7e0",
             textSelected: "white",
-            border: "#3baae4",
-            gridviewborder: "white",
-            settingsText: "#3baae4",
-            iconColor: "#3baae4"
+            border: "#3aa7e0",
+            gridviewborder: "#3aa7e0",
+            settingsText: "#3aa7e0",
+            iconColor: "#3aa7e0",
+            favoriteiconColor: "#3aa7e0"
         }
     }
 
@@ -57,12 +64,15 @@ FocusScope {
         switch(themeName) {
             case "BLACK AND WHITE":
                 currentTheme = themes.blackAndWhite;
+                maskImageSource = "assets/overlay/overlay.png";
                 break;
             case "DARK BREZEE":
                 currentTheme = themes.darkBreeze;
+                maskImageSource = "assets/overlay/overlay0.png";
                 break;
             case "BREZEE":
                 currentTheme = themes.breeze;
+                maskImageSource = "assets/overlay/overlay1.png";
                 break;
         }
     }
@@ -120,13 +130,13 @@ FocusScope {
         if (savedTheme) {
             applyTheme(savedTheme);
         }
+
         naviSound.play();
     }
 
     Item {
         id: collectionsItem
         property alias favoritesModel: favoritesProxyModel
-        property alias historyModel: continuePlayingProxyModel
 
         ListModel {
             id: collectionsModel
@@ -136,7 +146,7 @@ FocusScope {
                 var favoritecollection = { name: "Favorite", shortName: "favorite", games: favoritesProxyModel };
                 collectionsModel.append(favoritecollection);
                 collectionsModel.favoritesIndex = collectionsModel.count - 1;
-                var historycollection = { name: "History", shortName: "history", games: continuePlayingProxyModel };
+                var historycollection = { name: "History", shortName: "history", games: history };
                 collectionsModel.append(historycollection);
                 collectionsModel.historyIndex = collectionsModel.count - 1;
                 for (var i = 0; i < api.collections.count; ++i) {
@@ -153,24 +163,23 @@ FocusScope {
         }
 
         SortFilterProxyModel {
-            id: historyProxyModel
+            id: historyPlaying
             sourceModel: api.allGames
-            sorters: RoleSorter { roleName: "lastPlayed"; sortOrder: Qt.DescendingOrder }
+            filters: ExpressionFilter {
+                expression: lastPlayed != null && lastPlayed.toString() !== "Invalid Date"
+            }
+            sorters: RoleSorter {
+                roleName: "lastPlayed"
+                sortOrder: Qt.DescendingOrder
+            }
         }
 
-        ListModel {
-            id: continuePlayingProxyModel
-            Component.onCompleted: {
-                var currentDate = new Date()
-                var sevenDaysAgo = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000)
-                for (var i = 0; i < historyProxyModel.count; ++i) {
-                    var game = historyProxyModel.get(i)
-                    var lastPlayedDate = new Date(game.lastPlayed)
-                    var playTimeInMinutes = game.playTime / 60
-                    if (lastPlayedDate >= sevenDaysAgo && playTimeInMinutes > 1) {
-                        continuePlayingProxyModel.append(game)
-                    }
-                }
+        SortFilterProxyModel {
+            id: history
+            sourceModel: historyPlaying
+            filters: IndexFilter {
+                minimumIndex: 0
+                maximumIndex: 50
             }
         }
     }
@@ -230,15 +239,14 @@ FocusScope {
 
         ListView {
             id: collectionListView
-            width: parent.width * 0.95
+            width: parent.width * 0.90
             height: 60
             model: collectionsModel
             orientation: Qt.Horizontal
             spacing: 5
             clip: true
             anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.topMargin: 10
+            anchors.horizontalCenter: parent.horizontalCenter
             property string currentShortName: ""
             property int indexToPosition: -1
 
@@ -247,7 +255,6 @@ FocusScope {
                 anchors.top: collectionListView.top
                 anchors.bottom: collectionListView.bottom
                 anchors.left: collectionListView.left
-
                 width: root.width * 0.015
                 z: 2
 
@@ -263,13 +270,15 @@ FocusScope {
 
             delegate: Rectangle {
                 id: collectionlistview
-                width: 120
-                height: 40
+                width: root.width * 0.080
+                height: root.height * 0.04
+                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
                 color: index === collectionListView.currentIndex && collectionListView.focus ?
                 currentTheme.primary : currentTheme.secondary
                 border.color: currentTheme.border
                 border.width: 4
                 radius: 10
+
                 Text {
                     id: collectionname
                     anchors.centerIn: parent
@@ -278,12 +287,32 @@ FocusScope {
                     currentTheme.textSelected : currentTheme.text
 
                     font.bold: true
-                    font.pixelSize: index === collectionListView.currentIndex && collectionListView.focus ? 17 : 14
+                    font.pixelSize: index === collectionListView.currentIndex && collectionListView.focus ? parent.width * 0.14 : parent.width * 0.12
                     Behavior on font.pixelSize {
                         NumberAnimation {
                             duration: 100
                             easing.type: Easing.InOutQuad
                         }
+                    }
+                }
+            }
+
+
+            Item {
+                id: endGradientOverlay
+                anchors.top: collectionListView.top
+                anchors.bottom: collectionListView.bottom
+                anchors.right: parent.right
+                width: root.width * 0.015
+                z: 2
+                visible: collectionListView.contentWidth > collectionListView.width
+
+                Rectangle {
+                    anchors.fill: parent
+                    gradient: Gradient {
+                        orientation: Qt.Horizontal
+                        GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.0) }
+                        GradientStop { position: 1.0; color: currentTheme.background }
                     }
                 }
             }
@@ -406,7 +435,6 @@ FocusScope {
                             text: model.colorOption
                             font.pixelSize: 16
                             color: index === colorListView.currentIndex ? currentTheme.textSelected : currentTheme.text
-
                         }
                     }
 
@@ -451,18 +479,18 @@ FocusScope {
             property real selectedItemY: 0
             property real viewportX: contentX + width / 2
             property real viewportY: contentY + height / 2
-            anchors {
-                top: collectionListView.bottom
-                topMargin: 10
-                left: parent.left
-                right: parent.right
-                bottom: parent.bottom
-            }
-            width: parent.width * 0.8
-            cellWidth: conteiner.parent.width / 5
             cellHeight: (height) / 2
             keyNavigationEnabled: true
             keyNavigationWraps: true
+            width: parent.width
+            cellWidth: parent.width / 5 -5
+            anchors.horizontalCenterOffset: (parent.width - (Math.floor(parent.width / cellWidth) * cellWidth)) / 2
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors {
+                top: collectionListView.bottom
+                topMargin: 10
+                bottom: parent.bottom
+            }
             clip: true
             visible: !settingsIconSelected
 
@@ -499,6 +527,7 @@ FocusScope {
 
             delegate: Rectangle {
                 id: rectanglegridview
+
                 property bool isSelected: GridView.isCurrentItem
 
                 width: gameGridView.cellWidth
@@ -573,11 +602,9 @@ FocusScope {
                                     }
                                 }
 
-                                Image {
-                                    id: favoriteIcon
-                                    visible: model.favorite && boxfront.status === Image.Ready
-                                    source: "assets/favorite/favorite.png"
-                                    width: parent.width * 0.15
+                                Item {
+                                    id: favoriteIconContainer
+                                    width: parent.width * 0.17
                                     height: parent.height * 0.17
                                     anchors {
                                         top: boxfront.top
@@ -585,9 +612,35 @@ FocusScope {
                                         topMargin: (parent.height - boxfront.paintedHeight) / 2.5
                                         rightMargin: (parent.width - boxfront.paintedWidth) / 2.3
                                     }
+                                    Rectangle {
+                                        id: favoriteIconBackground
+                                        anchors.fill: parent
+                                        color: "transparent"
+                                        DropShadow {
+                                            anchors.fill: favoriteIcon
+                                            source: favoriteIcon
+                                            horizontalOffset: 0
+                                            verticalOffset: 0
+                                            radius: 10
+                                            color: "black"
+                                            visible: isSelected && gameGridView.focus
+                                        }
+                                        Image {
+                                            id: favoriteIcon
+                                            anchors.fill: parent
+                                            source: "assets/favorite/favorite.svg"
+                                            mipmap: true
+                                        }
+                                        ColorOverlay {
+                                            anchors.fill: favoriteIcon
+                                            source: favoriteIcon
+                                            color: currentTheme.favoriteiconColor
+                                            cached: true
+                                        }
+                                    }
+                                    visible: model.favorite && boxfront.status === Image.Ready
                                     scale: isSelected && gameGridView.focus ? 1.15 : 0.8
                                     Behavior on scale { NumberAnimation { duration: 150 } }
-                                    mipmap: true
                                 }
 
                                 Image {
@@ -610,6 +663,7 @@ FocusScope {
                             height: 40
                             text: model.title
                             color: isSelected && gameGridView.focus ? currentTheme.textSelected : currentTheme.text
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
                             font.bold: true
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -651,12 +705,26 @@ FocusScope {
             }
 
             Keys.onPressed: {
+                if (!event.isAutoRepeat && api.keys.isFilters(event)) {
+                    event.accepted = true;
+                    gameGridView.focus = false;
+                    gameInfoLoader.active = true;
+                    gameInfoFocused = true;
+
+                    if (gameInfoLoader.status === Loader.Ready) {
+                        gameInfoLoader.item.buttonsGames.forceActiveFocus();
+                    }
+                    naviSound.play();
+                }
+
                 if (!event.isAutoRepeat && (event.key === Qt.Key_Left || event.key === Qt.Key_Right || event.key === Qt.Key_Up || event.key === Qt.Key_Down)) {
                     naviSound.play();
                     if (currentItem) {
                         currentItem.updateSelectedItemPosition();
                     }
-                }if (!event.isAutoRepeat && api.keys.isAccept(event)) {
+                }
+
+                if (!event.isAutoRepeat && api.keys.isAccept(event)) {
                     event.accepted = true;
                     if (currentItem) {
                         currentItem.updateSelectedItemPosition();
@@ -664,11 +732,12 @@ FocusScope {
                     root.isMinimizing = true;
                     launchTimer.start();
                     launchSound.play();
-                }else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
+                } else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
                     event.accepted = true;
                     backSound.play();
                     collectionListView.focus = true;
                 }
+
                 if (api.keys.isNextPage(event)) {
                     naviSound.play();
                     collectionListView.incrementCurrentIndex();
@@ -677,10 +746,9 @@ FocusScope {
                     naviSound.play();
                     collectionListView.decrementCurrentIndex();
                     collectionListView.focus = true;
-                }
-                else if (!event.isAutoRepeat && api.keys.isDetails(event)) {
-                    event.accepted = true;
+                } else if (!event.isAutoRepeat && api.keys.isDetails(event)) {
                     favSound.play();
+                    event.accepted = true;
                     var selectedGame = gameGridView.model.get(gameGridView.currentIndex);
                     var collectionName = getNameCollecForGame(selectedGame);
                     for (var i = 0; i < api.collections.count; ++i) {
@@ -690,7 +758,6 @@ FocusScope {
                                 var game = collection.games.get(j);
                                 if (game.title === selectedGame.title) {
                                     game.favorite = !game.favorite;
-                                    updateContinuePlayingModel();
                                     break;
                                 }
                             }
@@ -703,9 +770,8 @@ FocusScope {
             onCurrentItemChanged: {
                 if (gameGridView.count > 0 && gameGridView.focus) {
                     bottomBar.selectedGame = gameGridView.model.get(gameGridView.currentIndex);
+                    game = gameGridView.model.get(gameGridView.currentIndex);
                     indexToPosition = currentIndex;
-                    updateGameInfo();
-
                     if (currentItem) {
                         currentItem.updateSelectedItemPosition();
                     }
@@ -726,323 +792,804 @@ FocusScope {
         property var selectedGame: null
         property real iconSize: Math.min(height * 0.50, width * 0.02)
 
-        Row {
-            id: allrowicons
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: backRow.left
-            anchors.rightMargin: 20
-            spacing: 20
-            visible: !settingsIconSelected
+        Item {
+            height: parent.height
+            width: parent.width * 0.95
+            anchors.horizontalCenter: parent.horizontalCenter
 
             Row {
-                spacing: 5
-                visible: !collectionListView.activeFocus
-                Rectangle {
-                    width: bottomBar.iconSize
-                    height: bottomBar.iconSize
-                    color: "transparent"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Image {
-                        id: favoriteicon
-                        anchors.fill: parent
-                        source: "assets/control/favorite.svg"
-                        visible: false
-                        mipmap: true
-                    }
-
-                    ColorOverlay {
-                        anchors.fill: favoriteicon
-                        source: favoriteicon
-                        color: currentTheme.iconColor
-                        cached: true
-                    }
-                }
-
-                Text {
-                    text: " FAVORITE"
-                    color: currentTheme.text
-                    font.bold: true
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            Row {
-                spacing: 5
-                visible: !collectionListView.activeFocus
-                Rectangle {
-                    width: bottomBar.iconSize
-                    height: bottomBar.iconSize
-                    color: "transparent"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Image {
-                        id: okicon
-                        anchors.fill: parent
-                        source: "assets/control/ok.svg"
-                        visible: false
-                        mipmap: true
-                    }
-
-                    ColorOverlay {
-                        anchors.fill: okicon
-                        source: okicon
-                        color: currentTheme.iconColor
-                        cached: true
-                    }
-                }
-
-                Text {
-                    text: " LAUNCH"
-                    color: currentTheme.text
-                    font.bold: true
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin: 100
-                }
-            }
-
-            Row {
-                spacing: 5
-                visible: collectionListView.activeFocus
-                Rectangle {
-                    width: bottomBar.iconSize
-                    height: bottomBar.iconSize
-                    color: "transparent"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Image {
-                        id: downicon
-                        anchors.fill: parent
-                        source: "assets/control/down.svg"
-                        visible: false
-                        mipmap: true
-                    }
-
-                    ColorOverlay {
-                        anchors.fill: downicon
-                        source: downicon
-                        color: currentTheme.iconColor
-                        cached: true
-                    }
-                }
-
-                Text {
-                    text: " GAMES"
-                    color: currentTheme.text
-                    font.bold: true
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            Row {
-                spacing: 5
-                visible: collectionListView.activeFocus
-                Rectangle {
-                    width: bottomBar.iconSize
-                    height: bottomBar.iconSize
-                    color: "transparent"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Image {
-                        id: previcon
-                        anchors.fill: parent
-                        source: "assets/control/prev.svg"
-                        visible: false
-                        mipmap: true
-                    }
-
-                    ColorOverlay {
-                        anchors.fill: previcon
-                        source: previcon
-                        color: currentTheme.iconColor
-                        cached: true
-                    }
-                }
-
-                Text {
-                    text: "PREV COLLECTION"
-                    color: currentTheme.text
-                    font.bold: true
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-
-            Row {
-                spacing: 5
-                visible: collectionListView.activeFocus
-                Rectangle {
-                    width: bottomBar.iconSize
-                    height: bottomBar.iconSize
-                    color: "transparent"
-                    anchors.verticalCenter: parent.verticalCenter
-
-                    Image {
-                        id: nexticon
-                        anchors.fill: parent
-                        source: "assets/control/next.svg"
-                        visible: false
-                        mipmap: true
-                    }
-
-                    ColorOverlay {
-                        anchors.fill: nexticon
-                        source: nexticon
-                        color: currentTheme.iconColor
-                        cached: true
-                    }
-                }
-
-                Text {
-                    text: "NEXT COLLECTION"
-                    color: currentTheme.text
-                    font.bold: true
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-            }
-        }
-
-        Row {
-            id: backRow
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            spacing: 5
-
-            Rectangle {
-                width: bottomBar.iconSize
-                height: bottomBar.iconSize
-                color: "transparent"
+                id: allrowicons
                 anchors.verticalCenter: parent.verticalCenter
+                anchors.right: backRow.left
+                anchors.rightMargin: 20
+                spacing: 20
+                visible: !settingsIconSelected
 
-                Image {
-                    id: backicon
-                    anchors.fill: parent
-                    source: "assets/control/back.svg"
-                    visible: false
-                    mipmap: true
+
+                Row {
+                    spacing: 5
+                    visible: !collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: detailsicon
+                            anchors.fill: parent
+                            source: "assets/control/details.svg"
+                            visible: false
+                            mipmap: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: detailsicon
+                            source: detailsicon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: " DETAILS"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
 
-                ColorOverlay {
-                    anchors.fill: backicon
-                    source: backicon
-                    color: currentTheme.iconColor
-                    cached: true
+                Row {
+                    spacing: 5
+                    visible: !collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: favoriteicon
+                            anchors.fill: parent
+                            source: "assets/control/favorite.svg"
+                            visible: false
+                            mipmap: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: favoriteicon
+                            source: favoriteicon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: " FAVORITE"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
-            }
 
-            Text {
-                text: " BACK"
-                color: currentTheme.text
-                font.bold: true
-                font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                anchors.verticalCenter: parent.verticalCenter
-            }
+                Row {
+                    spacing: 5
+                    visible: !collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
 
-            Rectangle {
-                width: 5
-                height: 1
-                color: "transparent"
-            }
-        }
+                        Image {
+                            id: okicon
+                            anchors.fill: parent
+                            source: "assets/control/ok.svg"
+                            visible: false
+                            mipmap: true
+                        }
 
-        Row{
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            spacing: 2
-            visible: !settingsIconSelected
+                        ColorOverlay {
+                            anchors.fill: okicon
+                            source: okicon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
 
-            Rectangle {
-                width: 5
-                height: 1
-                color: "transparent"
+                    Text {
+                        text: " LAUNCH"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.rightMargin: 100
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    visible: collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: downicon
+                            anchors.fill: parent
+                            source: "assets/control/down.svg"
+                            visible: false
+                            mipmap: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: downicon
+                            source: downicon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: " GAMES"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    visible: collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: previcon
+                            anchors.fill: parent
+                            source: "assets/control/prev.svg"
+                            visible: false
+                            mipmap: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: previcon
+                            source: previcon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: "PREV COLLECTION"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    visible: collectionListView.activeFocus
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: nexticon
+                            anchors.fill: parent
+                            source: "assets/control/next.svg"
+                            visible: false
+                            mipmap: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: nexticon
+                            source: nexticon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: "NEXT COLLECTION"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
             }
 
             Row {
+                id: backRow
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: parent.right
                 spacing: 5
-                Timer {
-                    id: clockTimer
-                    interval: 1000
-                    running: true
-                    repeat: true
-                    onTriggered: {
-                        currentTime = Qt.formatDateTime(new Date(), "dd-MM HH:mm")
+
+                Rectangle {
+                    width: bottomBar.iconSize
+                    height: bottomBar.iconSize
+                    color: "transparent"
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Image {
+                        id: backicon
+                        anchors.fill: parent
+                        source: "assets/control/back.svg"
+                        visible: false
+                        mipmap: true
+                    }
+
+                    ColorOverlay {
+                        anchors.fill: backicon
+                        source: backicon
+                        color: currentTheme.iconColor
+                        cached: true
                     }
                 }
 
                 Text {
-                    text: currentTime
+                    text: " BACK"
                     color: currentTheme.text
                     font.bold: true
                     font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
                     anchors.verticalCenter: parent.verticalCenter
                 }
-            }
 
-            Row {
-                spacing: 5
-                Text {
-                    text: "| Games: " + (gameGridView.count > 0 ? (gameGridView.currentIndex + 1) + "/" + gameGridView.count : "0/0 ")
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    color: currentTheme.text
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
+                Rectangle {
+                    width: 5
+                    height: 1
+                    color: "transparent"
                 }
             }
 
-            Row {
-                spacing: 5
-                Text {
-                    id: playTimeText
-                    text:"| Play Time: 00:00:00 "
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    color: currentTheme.text
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
+            Row{
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                spacing: 2
+                visible: !settingsIconSelected
+
+                Rectangle {
+                    width: 5
+                    height: 1
+                    color: "transparent"
                 }
-            }
 
-            Row {
-                spacing: 5
+                Row {
+                    spacing: 5
+                    Timer {
+                        id: clockTimer
+                        interval: 1000
+                        running: true
+                        repeat: true
+                        onTriggered: {
+                            currentTime = Qt.formatDateTime(new Date(), "dd-MM HH:mm")
+                        }
+                    }
 
-                Text {
-                    id: lastPlayedText
-                    text: "| Last Played: N/A"
-                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                    color: currentTheme.text
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
+                    Text {
+                        text: currentTime
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
+
+                Row {
+                    spacing: 5
+                    Text {
+                        text: "| Games: " + (gameGridView.count > 0 ? (gameGridView.currentIndex + 1) + "/" + gameGridView.count : "0/0 ")
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        color: currentTheme.text
+                        font.bold: true
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
                 }
             }
         }
     }
 
-    function updateGameInfo() {
-        var game = gameGridView.model.get(gameGridView.currentIndex);
-        if (game) {
-            var totalSeconds = game.playTime || 0;
-            var hours = Math.floor(totalSeconds / 3600);
-            var minutes = Math.floor((totalSeconds % 3600) / 60);
-            var seconds = totalSeconds % 60;
-            var playTimeFormatted =
-            (hours < 10 ? "0" : "") + hours + ":" +
-            (minutes < 10 ? "0" : "") + minutes + ":" +
-            (seconds < 10 ? "0" : "") + seconds;
-            playTimeText.text = "| Play Time: " + playTimeFormatted;
+    Loader {
+        id: gameInfoLoader
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: parent.height
+        y: active ? 0 : parent.height
+        active: false
+        asynchronous: true
+        focus: gameInfoFocused
 
-            if (game.lastPlayed) {
-                var formattedDate = Qt.formatDateTime(game.lastPlayed, "yyyy-MM-dd HH:mm");
-                lastPlayedText.text = "| Last Played: " + formattedDate;
-            } else {
-                lastPlayedText.text = "| Last Played: N/A";
+        Behavior on y {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.OutQuad
             }
-        } else {
-            playTimeText.text = "| Play Time: 00:00:00";
-            lastPlayedText.text = "| Last Played: N/A";
         }
+
+        sourceComponent: Item {
+            id: gameInfo
+            anchors.fill: parent
+
+            Item {
+                id: imageContainer
+                anchors.right: parent.right
+                width: parent.width * 0.65
+                height: parent.height * 0.75
+                anchors.top: parent.top
+
+                Image {
+                    id: backgroundImage
+                    width: imageContainer.width
+                    height: imageContainer.height
+                    source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/no-image/defaultimage.jpg"
+                    fillMode: Image.Stretch
+                    mipmap: true
+                    visible: true
+                }
+            }
+
+            Image {
+                id: defaultImage
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                source: "assets/no-image/defaultimage.jpg"
+                mipmap: true
+                visible: backgroundImage.status === Image.Error
+            }
+
+            Image {
+                id: maskImage
+                source: root.maskImageSource
+                anchors.fill: parent
+                fillMode: Image.Stretch
+                smooth: true
+                visible: true
+            }
+
+            RowLayout {
+                anchors {
+                    fill: parent
+                    margins: 40
+                }
+                spacing: 40
+
+                Image {
+                    id: boxArt
+                    source:  game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.jpg"
+                    Layout.preferredWidth: root.width * 0.3
+                    Layout.preferredHeight: root.height * 0.4
+                    fillMode: Image.PreserveAspectFit
+
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset: 0
+                        radius: 8.0
+                        samples: 16
+                        color: currentTheme.background
+                    }
+                }
+
+                Image {
+                    id: boxArtdefault
+                    Layout.preferredWidth: 300
+                    Layout.preferredHeight: 400
+                    source: "assets/no-image/defaultimage.jpg"
+                    fillMode: Image.PreserveAspectFit
+                    mipmap: true
+                    visible: boxArt.status === Image.Error
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 0
+                        verticalOffset: 0
+                        radius: 8.0
+                        samples: 16
+                        color: currentTheme.background
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 16
+
+                    Text {
+                        text: game && game.title ? game.title : ""
+                        font.pixelSize: root.width * 0.03
+                        font.bold: true
+                        color: "white"
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        elide: Text.ElideRight
+                    }
+
+                    RowLayout {
+                        spacing: 2
+
+                        Text {
+                            id: ratingText
+                            text: game && game.rating ? "Rating: " + (game.rating * 100).toFixed(0) + "%" : "Rating: N/A"
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            id: lastPlayed2
+                            text: calculateLastPlayedText()
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        id: buttonsGames
+                        spacing: 10
+
+                        property int currentIndex: 0
+
+                        Rectangle {
+                            id: playButton
+                            color: currentTheme.iconColor
+                            width: gameInfoLoader.width * 0.1 //120
+                            //height: parent.currentIndex === 0 ? 45 : 40
+                            height: parent.currentIndex === 0 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
+
+                            border.color: currentTheme.background
+                            radius: gameInfoLoader.width * 0.005 //10
+
+                            Behavior on height {
+                                NumberAnimation { duration: 50 }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "Launch"
+                                color: "white"
+                                font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
+                            }
+                        }
+
+                        Rectangle {
+                            id: favoriteButton
+                            color: currentTheme.iconColor
+                            width: gameInfoLoader.width * 0.1
+                            height: parent.currentIndex === 1 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
+                            border.color: currentTheme.background
+                            radius: gameInfoLoader.width * 0.005
+
+                            Behavior on height {
+                                NumberAnimation { duration: 50 }
+                            }
+
+                            property bool isFavorite: false
+
+                            Component.onCompleted: {
+                                updateFavoriteState();
+                            }
+
+                            function updateFavoriteState() {
+                                if (!game) return;
+                                var collectionName = getNameCollecForGame(game);
+                                for (var i = 0; i < api.collections.count; ++i) {
+                                    var collection = api.collections.get(i);
+                                    if (collection.name === collectionName) {
+                                        for (var j = 0; j < collection.games.count; ++j) {
+                                            var currentGame = collection.games.get(j);
+                                            if (currentGame.title === game.title) {
+                                                isFavorite = currentGame.favorite;
+                                                break;
+                                            }
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: favoriteButton.isFavorite ? "Favorite -" : "Favorite +"
+                                color: "white"
+                                font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
+                            }
+                        }
+
+                        focus: gameInfoFocused
+
+                        Keys.onLeftPressed: {
+                            if (currentIndex > 0) {
+                                currentIndex--;
+                                naviSound.play();
+                            }
+                        }
+
+                        Keys.onRightPressed: {
+                            if (currentIndex < 1) {
+                                currentIndex++;
+                                naviSound.play();
+                            }
+                        }
+
+                        Keys.onPressed: function(event) {
+                            if (!event.isAutoRepeat) {
+                                if (api.keys.isCancel(event)) {
+                                    gameInfoFocused = false;
+                                    gameGridView.focus = true;
+                                    naviSound.play();
+                                    event.accepted = true;
+
+                                    if (gameGridView.currentIndex >= 0 && gameGridView.currentIndex < gameGridView.count) {
+                                        game = gameGridView.model.get(gameGridView.currentIndex);
+                                    } else {
+                                        game = null;
+                                    }
+
+                                    gameInfoLoader.active = false;
+
+                                    if (favoriteButton) {
+                                        favoriteButton.updateFavoriteState();
+                                    }
+                                }
+
+                                if (api.keys.isAccept(event)) {
+                                    event.accepted = true;
+                                    if (currentIndex === 0) {
+                                        root.isMinimizing = true;
+                                        launchTimer.start();
+                                        launchSound.play();
+                                    }else {
+                                        favSound.play();
+                                        var selectedGame = game;
+                                        var collectionName = getNameCollecForGame(selectedGame);
+                                        for (var i = 0; i < api.collections.count; ++i) {
+                                            var collection = api.collections.get(i);
+                                            if (collection.name === collectionName) {
+                                                for (var j = 0; j < collection.games.count; ++j) {
+                                                    var currentGame = collection.games.get(j);
+                                                    if (currentGame.title === selectedGame.title) {
+                                                        currentGame.favorite = !currentGame.favorite;
+                                                        favoriteButton.isFavorite = currentGame.favorite;
+                                                        break;
+                                                    }
+                                                }
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    GridLayout {
+                        columns: 2
+                        rowSpacing: 12
+                        columnSpacing: 24
+                        Layout.topMargin: 32
+
+                        Text {
+                            text: "Developer:"
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: game && game.developer ? game.developer : "Unknown"
+                            color: "white"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            text: "Publisher:"
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: game && game.publisher ? game.publisher : "Unknown"
+                            color: "white"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            text: "Genre:"
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: {
+                                let genreText = game && game.genre ? game.genre : "Unknown";
+                                let separators = [",", "/", "-"];
+                                for (let separator of separators) {
+                                    if (genreText.includes(separator)) {
+                                        return genreText.split(separator)[0];
+                                    }
+                                }
+                                return genreText;
+                            }
+                            color: "white"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            text: "Release Date:"
+                            color: "#cccccc"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: game && game.releaseYear > 0 ? game.releaseYear.toString() : "Unknown"
+                            color: "white"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            id: playTimeText2
+                            text: "Play Time:"
+                            color: "#cccccc"
+                            visible: game && game.playTime > 0
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: calculatePlayTimeText(false)
+                            color: "white"
+                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            visible: game && game.playTime > 0
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: "black"
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    function calculateLastPlayedText() {
+        if (!game || !game.lastPlayed) {
+            return "| Last Played: Never"
+        }
+        let date = new Date(game.lastPlayed)
+        if (isNaN(date.getTime())) {
+            return "| Last Played: Never"
+        }
+        let now = new Date()
+        let today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        let yesterday = new Date(today.getTime() - (1000 * 60 * 60 * 24))
+        if (date >= today) {
+            return "| Last Played: Today"
+        } else if (date >= yesterday) {
+            return "| Last Played: Yesterday"
+        } else {
+            return "| Last Played: " + date.toLocaleDateString("en-GB")
+        }
+    }
+
+    function calculatePlayTimeText(includePrefix) {
+        let seconds = game && game.playTime || 0;
+        let hours = Math.floor(seconds / 3600);
+        let minutes = Math.floor((seconds % 3600) / 60);
+        let remainingSeconds = seconds % 60;
+
+        let hoursStr = hours.toString().padStart(2, '0');
+        let minutesStr = minutes.toString().padStart(2, '0');
+        let secondsStr = remainingSeconds.toString().padStart(2, '0');
+
+        let playTime = hoursStr + ":" + minutesStr + ":" + secondsStr;
+        return includePrefix ? "| Play Time: " + playTime : playTime;
     }
 
     function getNameCollecForGame(game) {
@@ -1056,22 +1603,5 @@ FocusScope {
             }
         }
         return "default";
-    }
-
-    function updateContinuePlayingModel() {
-        continuePlayingProxyModel.clear();
-
-        var currentDate = new Date();
-        var sevenDaysAgo = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-        for (var i = 0; i < historyProxyModel.count; ++i) {
-            var game = historyProxyModel.get(i);
-            var lastPlayedDate = new Date(game.lastPlayed);
-            var playTimeInMinutes = game.playTime / 60;
-
-            if (lastPlayedDate >= sevenDaysAgo && playTimeInMinutes > 1) {
-                continuePlayingProxyModel.append(game);
-            }
-        }
     }
 }

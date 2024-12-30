@@ -31,6 +31,14 @@
 - Los efectos de sonido han sido renovados, y se ha añadido una animación especial para el lanzamiento del juego seleccionado.
 </details>
 
+<details>
+<summary>Vista de detalles mejorada</summary>
+
+- Nueva función al presionar "Y" en el gamepad: una vista de detalles se deslizará desde la parte inferior, revelando datos del juego, tales como el título, la calificación, la última vez jugado, el desarrollador, el editor, el género, el año de lanzamiento y el tiempo de juego (oculto si es igual a 0).
+- Cada tema cuenta con su propio overlay para mostrar los detalles del juego, utilizando una captura de pantalla del juego para una vista rápida.
+![DETAILS]()
+</details>
+
 </details>
  
 # DEMO GIF
