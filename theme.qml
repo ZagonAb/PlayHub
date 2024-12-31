@@ -1222,7 +1222,7 @@ FocusScope {
                             id: ratingText
                             text: game && game.rating ? "Rating: " + (game.rating * 100).toFixed(0) + "%" : "Rating: N/A"
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1238,7 +1238,7 @@ FocusScope {
                             id: lastPlayed2
                             text: calculateLastPlayedText()
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1260,12 +1260,10 @@ FocusScope {
                         Rectangle {
                             id: playButton
                             color: currentTheme.iconColor
-                            width: gameInfoLoader.width * 0.1 //120
-                            //height: parent.currentIndex === 0 ? 45 : 40
+                            width: gameInfoLoader.width * 0.1
                             height: parent.currentIndex === 0 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
-
                             border.color: currentTheme.background
-                            radius: gameInfoLoader.width * 0.005 //10
+                            radius: gameInfoLoader.width * 0.005
 
                             Behavior on height {
                                 NumberAnimation { duration: 50 }
@@ -1399,7 +1397,7 @@ FocusScope {
                         Text {
                             text: "Developer:"
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1413,7 +1411,7 @@ FocusScope {
                         Text {
                             text: game && game.developer ? game.developer : "Unknown"
                             color: "white"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1428,7 +1426,7 @@ FocusScope {
                         Text {
                             text: "Publisher:"
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1442,7 +1440,7 @@ FocusScope {
                         Text {
                             text: game && game.publisher ? game.publisher : "Unknown"
                             color: "white"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1457,7 +1455,7 @@ FocusScope {
                         Text {
                             text: "Genre:"
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1480,7 +1478,7 @@ FocusScope {
                                 return genreText;
                             }
                             color: "white"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1495,7 +1493,7 @@ FocusScope {
                         Text {
                             text: "Release Date:"
                             color: "#cccccc"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1509,7 +1507,7 @@ FocusScope {
                         Text {
                             text: game && game.releaseYear > 0 ? game.releaseYear.toString() : "Unknown"
                             color: "white"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1526,7 +1524,7 @@ FocusScope {
                             text: "Play Time:"
                             color: "#cccccc"
                             visible: game && game.playTime > 0
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
                                 color: "black"
@@ -1540,7 +1538,7 @@ FocusScope {
                         Text {
                             text: calculatePlayTimeText(false)
                             color: "white"
-                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.06)
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             visible: game && game.playTime > 0
                             layer.enabled: true
                             layer.effect: DropShadow {
