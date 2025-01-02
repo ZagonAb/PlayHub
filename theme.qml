@@ -35,28 +35,28 @@ FocusScope {
         },
         "darkBreeze": {
             background: "#292d32",
-            primary: "#3aa7e0",
+            primary: "#2c5164",
             secondary: "#292d32",
-            text: "#3aa7e0",
+            text: "#a8a8a6",
             textSelected: "white",
-            border: "#3aa7e0",
-            gridviewborder: "#3aa7e0",
-            settingsText: "#3aa7e0",
-            iconColor: "#3aa7e0",
-            favoriteiconColor: "#3aa7e0"
+            border: "#3999cb",
+            gridviewborder: "#3999cb",
+            settingsText: "#3999cb",
+            iconColor: "#a8a8a6",
+            favoriteiconColor: "#d00003"
         },
         "breeze": {
             background: "#eff0f1",
-            primary: "#3aa7e0",
+            primary: "#bbdef1",
             secondary: "#eff0f1",
-            text: "#3aa7e0",
-            textgridview: "#3aa7e0",
-            textSelected: "white",
-            border: "#3aa7e0",
-            gridviewborder: "#3aa7e0",
-            settingsText: "#3aa7e0",
-            iconColor: "#3aa7e0",
-            favoriteiconColor: "#3aa7e0"
+            text: "#5a5b5b",
+            textgridview: "#3999cb",
+            textSelected: "#151515",
+            border: "#3999cb",
+            gridviewborder: "#3999cb",
+            settingsText: "#3999cb",
+            iconColor: "#5a5b5b",
+            favoriteiconColor: "#d00003"
         }
     }
 
@@ -276,7 +276,7 @@ FocusScope {
                 color: index === collectionListView.currentIndex && collectionListView.focus ?
                 currentTheme.primary : currentTheme.secondary
                 border.color: currentTheme.border
-                border.width: 4
+                border.width: 2
                 radius: 10
 
                 Text {
@@ -574,7 +574,7 @@ FocusScope {
                                     width: parent.width * 0.93
                                     height: parent.height * 0.93
                                     anchors.centerIn: parent
-                                    scale: isSelected && gameGridView.focus ? 1.05 : 1.0
+                                    scale: isSelected && gameGridView.focus ? 1.04 : 1.0
 
                                     Behavior on scale {
                                         NumberAnimation {
@@ -596,7 +596,7 @@ FocusScope {
                                     layer.enabled: isSelected
                                     layer.effect: Glow {
                                         samples: 100
-                                        color: currentTheme.background
+                                        color: currentTheme.textSelected
                                         spread: 0.5
                                         radius: 15
                                     }
@@ -804,7 +804,6 @@ FocusScope {
                 anchors.rightMargin: 20
                 spacing: 20
                 visible: !settingsIconSelected
-
 
                 Row {
                     spacing: 5
@@ -1174,12 +1173,11 @@ FocusScope {
                     fillMode: Image.PreserveAspectFit
 
                     layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 0
-                        verticalOffset: 0
-                        radius: 8.0
-                        samples: 16
-                        color: currentTheme.background
+                    layer.effect: Glow {
+                        samples: 100
+                        color: currentTheme.textSelected
+                        spread: 0.5
+                        radius: 15
                     }
                 }
 
@@ -1192,12 +1190,11 @@ FocusScope {
                     mipmap: true
                     visible: boxArt.status === Image.Error
                     layer.enabled: true
-                    layer.effect: DropShadow {
-                        horizontalOffset: 0
-                        verticalOffset: 0
-                        radius: 8.0
-                        samples: 16
-                        color: currentTheme.background
+                    layer.effect: Glow {
+                        samples: 100
+                        color: currentTheme.textSelected
+                        spread: 0.5
+                        radius: 15
                     }
                 }
 
@@ -1221,11 +1218,11 @@ FocusScope {
                         Text {
                             id: ratingText
                             text: game && game.rating ? "Rating: " + (game.rating * 100).toFixed(0) + "%" : "Rating: N/A"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1237,11 +1234,11 @@ FocusScope {
                         Text {
                             id: lastPlayed2
                             text: calculateLastPlayedText()
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1259,10 +1256,11 @@ FocusScope {
 
                         Rectangle {
                             id: playButton
-                            color: currentTheme.iconColor
+                            color: currentTheme.primary
                             width: gameInfoLoader.width * 0.1
                             height: parent.currentIndex === 0 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
-                            border.color: currentTheme.background
+
+                            border.color: currentTheme.textSelected
                             radius: gameInfoLoader.width * 0.005
 
                             Behavior on height {
@@ -1272,17 +1270,17 @@ FocusScope {
                             Text {
                                 anchors.centerIn: parent
                                 text: "Launch"
-                                color: "white"
+                                color: currentTheme.textSelected
                                 font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
                             }
                         }
 
                         Rectangle {
                             id: favoriteButton
-                            color: currentTheme.iconColor
+                            color: currentTheme.primary
                             width: gameInfoLoader.width * 0.1
                             height: parent.currentIndex === 1 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
-                            border.color: currentTheme.background
+                            border.color: currentTheme.textSelected
                             radius: gameInfoLoader.width * 0.005
 
                             Behavior on height {
@@ -1316,7 +1314,7 @@ FocusScope {
                             Text {
                                 anchors.centerIn: parent
                                 text: favoriteButton.isFavorite ? "Favorite -" : "Favorite +"
-                                color: "white"
+                                color: currentTheme.textSelected
                                 font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
                             }
                         }
@@ -1396,11 +1394,11 @@ FocusScope {
 
                         Text {
                             text: "Developer:"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1410,11 +1408,11 @@ FocusScope {
                         }
                         Text {
                             text: game && game.developer ? game.developer : "Unknown"
-                            color: "white"
+                            color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1425,11 +1423,11 @@ FocusScope {
 
                         Text {
                             text: "Publisher:"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1439,11 +1437,11 @@ FocusScope {
                         }
                         Text {
                             text: game && game.publisher ? game.publisher : "Unknown"
-                            color: "white"
+                            color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1454,11 +1452,11 @@ FocusScope {
 
                         Text {
                             text: "Genre:"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1477,11 +1475,11 @@ FocusScope {
                                 }
                                 return genreText;
                             }
-                            color: "white"
+                            color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1492,11 +1490,11 @@ FocusScope {
 
                         Text {
                             text: "Release Date:"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1506,11 +1504,11 @@ FocusScope {
                         }
                         Text {
                             text: game && game.releaseYear > 0 ? game.releaseYear.toString() : "Unknown"
-                            color: "white"
+                            color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1522,12 +1520,12 @@ FocusScope {
                         Text {
                             id: playTimeText2
                             text: "Play Time:"
-                            color: "#cccccc"
+                            color: currentTheme.text
                             visible: game && game.playTime > 0
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
@@ -1537,12 +1535,12 @@ FocusScope {
                         }
                         Text {
                             text: calculatePlayTimeText(false)
-                            color: "white"
+                            color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             visible: game && game.playTime > 0
                             layer.enabled: true
                             layer.effect: DropShadow {
-                                color: "black"
+                                color: currentTheme.background
                                 radius: 3
                                 samples: 5
                                 spread: 0.3
