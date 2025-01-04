@@ -7,7 +7,8 @@
 - En la parte inferior de la pantalla, una barra de información proporciona detalles relevantes del juego seleccionado, como la última vez que se jugó (lastplayed), el tiempo total de juego (playTime), la cantidad de juegos en la colección actual, así como la fecha y hora actuales.
 
 # DEMO GIF
-![DEMO](https://i.imgur.com/rYnAcLm.mp4)
+![VIEW]()
+
 
 # Screenshots
 
