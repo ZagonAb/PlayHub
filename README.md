@@ -8,7 +8,6 @@
 
 ![VIEW](https://github.com/ZagonAb/PlayHub/blob/ddd137a33fa0b96422846553522bfb406102eeea/.meta/screenshots/view.gif)
 
-
 # Screenshots
 
 ![screenshots0](https://github.com/ZagonAb/PlayHub/blob/d9ec1e0567b81f206d75f3239952b42dd723b344/.meta/screenshots/screenshot1.png)
