@@ -7,7 +7,7 @@
 - En la parte inferior de la pantalla, una barra de información proporciona detalles relevantes del juego seleccionado, como la última vez que se jugó (lastplayed), el tiempo total de juego (playTime), la cantidad de juegos en la colección actual, así como la fecha y hora actuales.
 
 # DEMO GIF
-![DEMO](https://github.com/user-attachments/assets/17f339a9-8b3a-4fd7-92b9-dc276fc2fff4)
+![DEMO](https://imgur.com/a/playhub-pgasus-fe-IOZaO16)
 
 # Screenshots
 
