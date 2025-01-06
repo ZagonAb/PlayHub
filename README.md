@@ -14,7 +14,7 @@
 ![screenshots1](https://github.com/ZagonAb/PlayHub/blob/d9ec1e0567b81f206d75f3239952b42dd723b344/.meta/screenshots/screenshot2.png)
 
  <details>
-<summary>Cambios y mejoras recientes en el Tema 12/24</summary> 
+<summary>Cambios y mejoras recientes en el Tema desde 12/24</summary> 
   <br>
   
 <details>
