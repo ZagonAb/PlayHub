@@ -11,6 +11,7 @@ FocusScope {
     focus: true
     property bool settingsIconSelected: false
     property bool settingsIconFocused: false
+    property bool initialZoomComplete: false
     property bool gameInfoFocused: false
     property bool gameInfoVisible: false
     property bool isMinimizing: false
@@ -19,6 +20,292 @@ FocusScope {
     property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
     property var currentTheme: themes.blackAndWhite
     property string maskImageSource: "assets/overlay/overlay.png"
+
+    FontLoader {
+        id: fontLoader
+        source: "assets/font/font.ttf"
+    }
+
+    Rectangle {
+        id: mainContainer
+        width: parent.width
+        height: parent.height
+        color: "transparent"
+        z: 100
+
+        property real contentOpacity: 1.
+
+        Item {
+            id: backgroundContainer
+            anchors.fill: parent
+
+            opacity: mainContainer.contentOpacity
+
+            Image {
+                id: backgroundImage
+                anchors.fill: parent
+                source: "assets/overlay/glass.png"
+                fillMode: Image.PreserveAspectCrop
+                visible: true
+                mipmap: true
+                asynchronous: true
+            }
+        }
+
+        Item {
+            id: textContainer
+            anchors.centerIn: parent
+            width: root.width * 0.70
+            height: parent.height
+            opacity: mainContainer.contentOpacity
+            property real baseX: width / 2 - 85
+            property var letterSpacings: ({
+                'P': - root.width * 0.23,
+                'l': - root.width * 0.15,
+                'a': - root.width * 0.10,
+                'y': - root.width * 0.02,
+                'H':  root.width * 0.06,
+                'u':  root.width * 0.15,
+                'b':  root.width * 0.24,
+            })
+
+            Repeater {
+                model: ListModel {
+                    ListElement { letter: "P"; index: 0 }
+                    ListElement { letter: "l"; index: 1 }
+                    ListElement { letter: "a"; index: 2 }
+                    ListElement { letter: "y"; index: 3 }
+                    ListElement { letter: "H"; index: 4 }
+                    ListElement { letter: "u"; index: 5 }
+                    ListElement { letter: "b"; index: 6 }
+                }
+
+                delegate: Text {
+                    id: letter
+                    text: model.letter
+                    font.pixelSize: root.width * 0.15
+                    color: "white"
+                    font.family: fontLoader.name
+                    font.bold: true
+                    x: textContainer.width / 2 - width / 2
+                    y: -100
+                    opacity: 0
+                    style: Text.Outline
+                    styleColor: "black"
+                    layer.enabled: true
+                    layer.effect: DropShadow {
+                        horizontalOffset: 3
+                        verticalOffset: 3
+                        radius: 20
+                        samples: 20
+                        color: "black"
+                    }
+
+                    property real finalX: textContainer.baseX + textContainer.letterSpacings[text]
+                    property real finalY: textContainer.height / 2 - height / 2
+
+                    SequentialAnimation {
+                        running: true
+                        loops: 1
+
+                        PauseAnimation {
+                            duration: index * 150
+                        }
+
+                        ParallelAnimation {
+                            NumberAnimation {
+                                target: letter
+                                property: "opacity"
+                                from: 0.5
+                                to: 1
+                                duration: 800
+                                easing.type: Easing.InOutQuad
+                            }
+
+                            NumberAnimation {
+                                target: letter
+                                property: "y"
+                                to: finalY
+                                duration: 800
+                                easing.type: Easing.OutBounce
+                            }
+                        }
+
+                        PauseAnimation {
+                            duration: 300
+                        }
+
+                        NumberAnimation {
+                            target: letter
+                            property: "x"
+                            to: finalX
+                            duration: 300
+                            easing.type: Easing.OutQuad
+                        }
+                    }
+                }
+            }
+
+            property var subtitleTexts: [
+                "Theme For Pegasus-Frontend.",
+                "Happy Gaming!",
+                "Enjoy your favorite games.",
+                "Remember your last released game.",
+                "Let the games begin!",
+                "Your gaming journey starts here.",
+                "Get ready to play.",
+                "Gaming memories await.",
+                "Welcome to gamer paradise.",
+                "Your game collection, always at your fingertips.",
+                "Browse, select, and play without limits.",
+                "Where your games come to life.",
+                "Relive your best gaming moments.",
+                "It's always a good time to game.",
+                "The adventure begins with a click.",
+                "Your favorite classics await.",
+                "The next level is just a button away.",
+                "Let the fun never end.",
+                "Your games, your rules.",
+                "All set for a marathon of fun.",
+                "Keep playing, keep dreaming.",
+                "Your portal to extraordinary worlds.",
+                "Nostalgia is just a step away.",
+                "Turn every game into an epic adventure.",
+                "Pick up where you left off with your last game.",
+                "The magic of gaming starts here.",
+                "Your gamer world, personalized for you."
+            ]
+
+            function getRandomText() {
+                var index = Math.floor(Math.random() * subtitleTexts.length)
+                return subtitleTexts[index]
+            }
+
+            Text {
+                id: subtitleText
+                text: textContainer.getRandomText()
+                x: textContainer.width / 2 - width / 2
+                y: parent.height * 0.65
+                font.pixelSize: root.width * 0.02
+                color: "white"
+                opacity: 0
+                style: Text.Outline
+                styleColor: "black"//"#80000000"
+
+                layer.enabled: true
+                layer.effect: DropShadow {
+                    horizontalOffset: 3
+                    verticalOffset: 3
+                    radius: 20
+                    samples: 20
+                    color: "black"
+                }
+
+                SequentialAnimation {
+                    running: true
+                    PauseAnimation {
+                        duration: 2450
+                    }
+
+                    NumberAnimation {
+                        target: subtitleText
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+            }
+        }
+
+        SoundEffect {
+            id: soundEffect
+            source: "assets/sound/sound.wav"
+            loops: 1
+            volume: 0.2
+        }
+
+        Timer {
+            id: soundTimer
+            interval: 1500
+            running: true
+            repeat: false
+            onTriggered: soundEffect.play()
+        }
+
+        Timer {
+            id: fadeOutTimer
+            interval: 4000
+            running: true
+            repeat: false
+            onTriggered: {
+                fadeOutAnimation.start()
+            }
+        }
+
+        NumberAnimation {
+            id: fadeOutAnimation
+            target: mainContainer
+            property: "contentOpacity"
+            from: 1.0
+            to: 0.0
+            duration: 2000
+            easing.type: Easing.InOutQuad
+            onStopped: {
+                mainContainer.destroy()
+            }
+        }
+    }
+
+    transform: Scale {
+        id: initialZoom
+        origin.x: root.width / 2
+        origin.y: root.height / 2
+        xScale: root.initialZoomComplete ? 1.0 : 4.0
+        yScale: root.initialZoomComplete ? 1.0 : 4.0
+
+        Behavior on xScale {
+            NumberAnimation {
+                duration: 3000
+                easing.type: Easing.OutCubic
+            }
+        }
+        Behavior on yScale {
+            NumberAnimation {
+                duration: 3000
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    opacity: root.initialZoomComplete ? 1.0 : 0.05
+    Behavior on opacity {
+        NumberAnimation {
+            duration: 3000
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    Timer {
+        id: initialZoomTimer
+        interval: 100
+        running: true
+        repeat: false
+        onTriggered: {
+            root.initialZoomComplete = true
+            focusTimer.start()
+        }
+    }
+
+    Timer {
+        id: focusTimer
+        interval: 3100
+        repeat: false
+        onTriggered: {
+            collectionListView.focus = true
+        }
+    }
 
     readonly property var themes: {
         "blackAndWhite": {
@@ -189,6 +476,7 @@ FocusScope {
         width: parent.width
         height: parent.height * 0.92
         color: currentTheme.background
+        visible: true
 
         Item {
             id: settingsImage
@@ -330,7 +618,7 @@ FocusScope {
                 indexToPosition = currentIndex
             }
 
-            focus: true
+            //focus: true
 
             Keys.onLeftPressed: {
                 if (collectionListView.currentIndex === 0) {

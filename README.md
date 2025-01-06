@@ -42,6 +42,15 @@
 - Cada tema cuenta con su propio overlay para mostrar los detalles del juego, utilizando una captura de pantalla del juego para una vista rápida.
 </details>
 
+<details>
+<summary>Secuencia de apertura mejorada</summary>
+
+-  Se agregaron animaciones de entrada coordinadas que presentan una transición de zoom suave y una revelación dinámica letra por letra de "PlayHub", lo que crea una experiencia de inicio atractiva.
+
+![screenshots3]()
+
+</details>
+
 </details>
  
 # Licencia
