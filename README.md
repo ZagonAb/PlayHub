@@ -2,9 +2,9 @@
 
 - Este tema sigue siendo una interfaz minimalista y centrada, diseñada para ofrecer una experiencia de navegación fluida. Aunque conserva su esencia sencilla, ahora incorpora algunos efectos visuales y sonoros que enriquecen la interacción sin comprometer la limpieza del diseño. La principal característica visual sigue siendo la portada del juego (boxFront), destacada como el elemento gráfico principal. La navegación es intuitiva, permitiendo un desplazamiento fácil entre las colecciones y los juegos, acompañado de efectos sutiles al moverse entre colecciones, seleccionar juegos o marcar un juego como favorito.
 
-- Incluye dos colecciones adicionales: "FAVORITE" y "HISTORY". La colección "FAVORITE" agrupa todos los juegos marcados como favoritos por el usuario, mientras que "HISTORY" se encarga de mostrar los juegos lanzados recientemente. Esta última colección contiene solo aquellos juegos que han sido jugados por más de un minuto en los últimos siete días.
+- Incluye dos colecciones adicionales: "FAVORITE" y "HISTORY". La colección "FAVORITE" agrupa todos los juegos marcados como favoritos por el usuario, mientras que "HISTORY" se encarga de mostrar los juegos lanzados recientemente. ~~Esta última colección contiene solo aquellos juegos que han sido jugados por más de un minuto en los últimos siete días.~~
 
-- En la parte inferior de la pantalla, una barra de información proporciona detalles relevantes del juego seleccionado, como la última vez que se jugó (lastplayed), el tiempo total de juego (playTime), la cantidad de juegos en la colección actual, así como la fecha y hora actuales.
+- En la parte inferior de la pantalla, una barra de información muestra la cantidad de juegos en la colección actual, junto con la fecha y hora actuales. Para obtener más información sobre un juego, presione el botón superior para ver detalles adicionales.
 
 ![VIEW](https://github.com/ZagonAb/PlayHub/blob/ddd137a33fa0b96422846553522bfb406102eeea/.meta/screenshots/view.gif)
 
