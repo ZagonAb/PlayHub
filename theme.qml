@@ -190,7 +190,7 @@ FocusScope {
                 color: "white"
                 opacity: 0
                 style: Text.Outline
-                styleColor: "black"//"#80000000"
+                styleColor: "black"
 
                 layer.enabled: true
                 layer.effect: DropShadow {
@@ -918,6 +918,7 @@ FocusScope {
                                             anchors.fill: parent
                                             source: "assets/favorite/favorite.svg"
                                             mipmap: true
+                                            asynchronous: true
                                         }
                                         ColorOverlay {
                                             anchors.fill: favoriteIcon
@@ -975,14 +976,67 @@ FocusScope {
                 }
             }
 
-            Text {
-                id: noGamesText
+            Item {
+                id: enptyCollection
                 anchors.centerIn: parent
+                width: parent.width * 0.5
+                height: parent.height * 0.5
                 visible: gameGridView.count === 0
-                text: "No " + collectionListView.currentShortName + " Available"
-                font.pixelSize: 20
-                color: "black"
-                anchors.verticalCenter: parent.verticalCenter
+                opacity: 0
+
+                Behavior on opacity {
+                    NumberAnimation {
+                        duration: 1000
+                        easing.type: Easing.InOutQuad
+                    }
+                }
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 10
+                    Text {
+                        text: "The " + collectionListView.currentShortName + " collection is empty"
+                        font.pixelSize: 20
+                        color: currentTheme.text
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+                    Item {
+                        width: parent.width * 0.70
+                        height: parent.height * 0.70
+                        anchors.horizontalCenter: parent.horizontalCenter
+
+                        Image {
+                            id: collectionsIcons
+                            source: collectionListView.currentShortName === "favorite"
+                            ? "assets/icons/favorite.svg"
+                            : "assets/icons/history.svg"
+                            fillMode: Image.PreserveAspectFit
+                            asynchronous: true
+                            width: parent.width
+                            height: parent.height
+                            mipmap: true
+                            visible: true
+                            anchors.centerIn: parent
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: collectionsIcons
+                            source: collectionsIcons
+                            color: currentTheme.text
+                            antialiasing: true
+                        }
+                    }
+                }
+
+                Timer {
+                    id: showEmptyCollectionTimer
+                    interval: 5500
+                    running: gameGridView.count === 0
+                    repeat: false
+                    onTriggered: {
+                        enptyCollection.opacity = 1
+                    }
+                }
             }
 
             focus: true
@@ -1108,6 +1162,7 @@ FocusScope {
                             source: "assets/control/details.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1142,6 +1197,7 @@ FocusScope {
                             source: "assets/control/favorite.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1176,6 +1232,7 @@ FocusScope {
                             source: "assets/control/ok.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1211,6 +1268,7 @@ FocusScope {
                             source: "assets/control/down.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1245,6 +1303,7 @@ FocusScope {
                             source: "assets/control/prev.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1279,6 +1338,7 @@ FocusScope {
                             source: "assets/control/next.svg"
                             visible: false
                             mipmap: true
+                            asynchronous: true
                         }
 
                         ColorOverlay {
@@ -1317,6 +1377,7 @@ FocusScope {
                         source: "assets/control/back.svg"
                         visible: false
                         mipmap: true
+                        asynchronous: true
                     }
 
                     ColorOverlay {
@@ -1425,6 +1486,7 @@ FocusScope {
                     fillMode: Image.Stretch
                     mipmap: true
                     visible: true
+                    asynchronous: true
                 }
             }
 
@@ -1435,6 +1497,7 @@ FocusScope {
                 source: "assets/no-image/defaultimage.jpg"
                 mipmap: true
                 visible: backgroundImage.status === Image.Error
+                asynchronous: true
             }
 
             Image {
@@ -1459,6 +1522,7 @@ FocusScope {
                     Layout.preferredWidth: root.width * 0.3
                     Layout.preferredHeight: root.height * 0.4
                     fillMode: Image.PreserveAspectFit
+                    asynchronous: true
 
                     layer.enabled: true
                     layer.effect: Glow {
@@ -1476,6 +1540,7 @@ FocusScope {
                     source: "assets/no-image/defaultimage.jpg"
                     fillMode: Image.PreserveAspectFit
                     mipmap: true
+                    asynchronous: true
                     visible: boxArt.status === Image.Error
                     layer.enabled: true
                     layer.effect: Glow {
