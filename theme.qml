@@ -1008,7 +1008,7 @@ FocusScope {
                         Image {
                             id: collectionsIcons
                             source: collectionListView.currentShortName === "favorite"
-                            ? "assets/icons/favorite.svg"
+                            ? "assets/icons/addfavorite.svg"
                             : "assets/icons/history.svg"
                             fillMode: Image.PreserveAspectFit
                             asynchronous: true
