@@ -1057,6 +1057,7 @@ FocusScope {
             }
 
             focus: true
+
             SoundEffect {
                 id: favSound
                 source: "assets/audio/Fav.wav"
