@@ -221,7 +221,7 @@ FocusScope {
 
         SoundEffect {
             id: soundEffect
-            source: "assets/sound/sound.wav"
+            source: "assets/audio/sound.wav"
             loops: 1
             volume: 0.2
         }
@@ -344,7 +344,19 @@ FocusScope {
             settingsText: "#3999cb",
             iconColor: "#5a5b5b",
             favoriteiconColor: "#d00003"
-        }
+        },
+        "nordicdarker": {
+            background: "#3B4252",
+            primary: "#707d97",
+            secondary: "#3B4252",
+            text: "#b2b6c0",
+            textSelected: "white",
+            border: "#707d97",
+            gridviewborder: "#707d97",
+            settingsText: "#707d97",
+            iconColor: "#b2b6c0",
+            favoriteiconColor: "#d00003"
+        },
     }
 
     function applyTheme(themeName) {
@@ -360,6 +372,10 @@ FocusScope {
             case "BREZEE":
                 currentTheme = themes.breeze;
                 maskImageSource = "assets/overlay/overlay1.png";
+                break;
+            case "NORDIC DARKER":
+                currentTheme = themes.nordicdarker;
+                maskImageSource = "assets/overlay/overlay2.png";
                 break;
         }
     }
@@ -707,6 +723,7 @@ FocusScope {
                         ListElement { colorOption: "BLACK AND WHITE" }
                         ListElement { colorOption: "DARK BREZEE" }
                         ListElement { colorOption: "BREZEE" }
+                        ListElement { colorOption: "NORDIC DARKER" }
                     }
 
                     delegate: Rectangle {
