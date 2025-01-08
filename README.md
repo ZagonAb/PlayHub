@@ -26,7 +26,7 @@
 <details>
 <summary>Personalización de la Apariencia: Selección de Temas de Colores</summary>
 
-- Se ha implementado un sencillo menú para la selección de tres tipos distintos de temas de color: **WHITE AND BLACK** (el tema predeterminado), **DARK BREEZE** y **BREEZE**. Esta implementación se basa en los temas predeterminados y sus colores principales de **KDE Neon**. Además, utilizando api.memory, la interfaz guardará y restaurará el tema seleccionado al volver a abrirla."
+- Se ha implementado un sencillo menú para la selección de cuatro tipos distintos de temas de color: **WHITE AND BLACK** (el tema predeterminado), **DARK BREEZE**, **BREEZE** y **NORDIC DARKER**. Esta implementación se basa en los colores principales de **KDE Neon** del tema **NORDIC DARKER** Además, utilizando api.memory, la interfaz guardará y restaurará el tema seleccionado al volver a abrirla."
 </details>
 
 <details>
