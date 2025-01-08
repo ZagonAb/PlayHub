@@ -19,6 +19,7 @@ FocusScope {
     property real iconSize: Math.min(height * 0.50, width * 0.02)
     property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
     property var currentTheme: themes.blackAndWhite
+    property string currentThemeName: api.memory.get('selectedTheme') || "BLACK AND WHITE"
     property string maskImageSource: "assets/overlay/overlay.png"
 
     FontLoader {
@@ -431,9 +432,9 @@ FocusScope {
     Component.onCompleted: {
         const savedTheme = api.memory.get('selectedTheme');
         if (savedTheme) {
+            root.currentThemeName = savedTheme;
             applyTheme(savedTheme);
         }
-
         naviSound.play();
     }
 
@@ -689,11 +690,29 @@ FocusScope {
 
             Image {
                 id: settingbackground
-                source: "assets/setting/settingbackground.png"
+                source: "assets/setting/settingbackground.svg"
                 width: parent.width * 0.5
                 height: parent.height * 0.8
                 anchors.centerIn: parent
-                opacity: 0.3
+
+                mipmap: true
+                visible: false
+            }
+
+            ColorOverlay {
+                id: iconOverlayicon
+                anchors.fill: settingbackground
+                source: settingbackground
+                color: currentTheme.iconColor
+                opacity: 0.2
+                visible: true
+                cached: true
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 150
+                    }
+                }
             }
 
             Column {
@@ -731,15 +750,44 @@ FocusScope {
                         width: colorListView.width
                         height: 50
                         radius: 30
-                        color: index === colorListView.currentIndex ? currentTheme.primary : currentTheme.secondary
+
+                        color: {
+                            if (index === colorListView.currentIndex) {
+                                return currentTheme.primary
+                            } else if (model.colorOption === root.currentThemeName) {
+                                return Qt.darker(currentTheme.primary, 1.2)
+                            } else {
+                                return currentTheme.secondary
+                            }
+                        }
+
                         opacity: 0.8
+
+                        Rectangle {
+                            width: 8
+                            height: parent.height * 0.5
+                            anchors.left: parent.left
+                            anchors.leftMargin: 10
+                            anchors.verticalCenter: parent.verticalCenter
+                            radius: 4
+                            visible: model.colorOption === root.currentThemeName
+                            color: currentTheme.border
+                        }
 
                         Text {
                             id: colornames
                             anchors.centerIn: parent
                             text: model.colorOption
                             font.pixelSize: 16
-                            color: index === colorListView.currentIndex ? currentTheme.textSelected : currentTheme.text
+                            color: {
+                                if (index === colorListView.currentIndex) {
+                                    return currentTheme.textSelected
+                                } else if (model.colorOption === root.currentThemeName) {
+                                    return currentTheme.textSelected
+                                } else {
+                                    return currentTheme.text
+                                }
+                            }
                         }
                     }
 
@@ -762,9 +810,10 @@ FocusScope {
                             event.accepted = true;
                             const selectedTheme = model.get(currentIndex).colorOption;
                             api.memory.set('selectedTheme', selectedTheme);
+                            root.currentThemeName = selectedTheme;
                             applyTheme(selectedTheme);
                             naviSound.play();
-                        } else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
+                        }else if (!event.isAutoRepeat && api.keys.isCancel(event)) {
                             event.accepted = true;
                             settingsIconSelected = false;
                             settingsIconFocused = false;
@@ -1378,6 +1427,50 @@ FocusScope {
             }
 
             Row {
+                id: okRow
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.right: backRow.left
+                spacing: 10
+                visible: colorListView.focus
+
+                Rectangle {
+                    width: bottomBar.iconSize
+                    height: bottomBar.iconSize
+                    color: "transparent"
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Image {
+                        id: okicon2
+                        anchors.fill: parent
+                        source: "assets/control/ok.svg"
+                        visible: false
+                        mipmap: true
+                    }
+
+                    ColorOverlay {
+                        anchors.fill: okicon2
+                        source: okicon2
+                        color: currentTheme.iconColor
+                        cached: true
+                        visible: true
+                    }
+                }
+
+                Text {
+                    text: "CHOOSE"
+                    color: currentTheme.text
+                    font.bold: true
+                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+                Rectangle {
+                    width: 5
+                    height: 1
+                    color: "transparent"
+                }
+            }
+
+            Row {
                 id: backRow
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.right: parent.right
@@ -1395,7 +1488,6 @@ FocusScope {
                         source: "assets/control/back.svg"
                         visible: false
                         mipmap: true
-                        asynchronous: true
                     }
 
                     ColorOverlay {
@@ -1403,6 +1495,7 @@ FocusScope {
                         source: backicon
                         color: currentTheme.iconColor
                         cached: true
+                        visible: true
                     }
                 }
 
