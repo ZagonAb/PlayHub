@@ -43,21 +43,21 @@
 </details>
 
 <details>
-<summary>Descripción añadida</summary>
-
-- Se agregó un nuevo componente de texto de desplazamiento dinámico para mostrar la descripción del juego.
-- Muestra el texto de la descripción del juego hasta el segundo punto seguido, utilizando una animación de desplazamiento suave si es necesario. 
-- Maneja las descripciones faltantes con un mensaje de respaldo.
-![descr](https://github.com/ZagonAb/PlayHub/blob/f67a27830033c2da68182b7f2d0e8d10b86027ad/.meta/screenshots/descr.gif)
-</details>
-
-<details>
 <summary>Secuencia de apertura mejorada</summary>
 
 -  Se agregaron animaciones de entrada coordinadas que presentan una transición de zoom suave y una revelación dinámica letra por letra de "PlayHub", lo que crea una experiencia de inicio atractiva.
 
 ![screenshots3](https://github.com/ZagonAb/PlayHub/blob/929fd2a9da0d39b81c696ab6eeec6300a4600118/.meta/screenshots/intro.png)
 
+</details>
+
+<details>
+<summary>Descripción añadida</summary>
+
+- Se agregó un nuevo componente de texto de desplazamiento dinámico para mostrar la descripción del juego.
+- Muestra el texto de la descripción del juego hasta el segundo punto seguido, utilizando una animación de desplazamiento suave si es necesario. 
+- Maneja las descripciones faltantes con un mensaje de respaldo.
+![descr](https://github.com/ZagonAb/PlayHub/blob/f67a27830033c2da68182b7f2d0e8d10b86027ad/.meta/screenshots/descr.gif)
 </details>
 
 </details>
