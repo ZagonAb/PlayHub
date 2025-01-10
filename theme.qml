@@ -1591,7 +1591,7 @@ FocusScope {
                     id: backgroundImage
                     width: imageContainer.width
                     height: imageContainer.height
-                    source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/no-image/defaultimage.jpg"
+                    source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/no-image/defaultimage.png"
                     fillMode: Image.Stretch
                     mipmap: true
                     visible: true
@@ -1603,7 +1603,7 @@ FocusScope {
                 id: defaultImage
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectCrop
-                source: "assets/no-image/defaultimage.jpg"
+                source: "assets/no-image/defaultimage.png"
                 mipmap: true
                 visible: backgroundImage.status === Image.Error
                 asynchronous: true
@@ -1627,7 +1627,7 @@ FocusScope {
 
                 Image {
                     id: boxArt
-                    source:  game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.jpg"
+                    source:  game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.png"
                     Layout.preferredWidth: root.width * 0.3
                     Layout.preferredHeight: root.height * 0.4
                     fillMode: Image.PreserveAspectFit
@@ -1646,7 +1646,7 @@ FocusScope {
                     id: boxArtdefault
                     Layout.preferredWidth: 300
                     Layout.preferredHeight: 400
-                    source: "assets/no-image/defaultimage.jpg"
+                    source: "assets/no-image/defaultimage.png"
                     fillMode: Image.PreserveAspectFit
                     mipmap: true
                     asynchronous: true
@@ -2010,6 +2010,99 @@ FocusScope {
                                 verticalOffset: 0
                             }
                         }
+                    }
+                }
+            }
+
+            Item {
+                id: descriptionContainer
+                anchors {
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+                height: parent.height * 0.1
+
+                Item {
+                    id: clipContainer
+                    anchors {
+                        leftMargin: 10
+                        fill: parent
+                    }
+
+                    clip: true
+
+                    Text {
+                        id: scrollingText
+                        text: {
+                            if (game && game.description) {
+                                var firstDotIndex = game.description.indexOf(".");
+                                var secondDotIndex = game.description.indexOf(".", firstDotIndex + 1);
+                                if (secondDotIndex !== -1) {
+                                    return game.description.substring(0, secondDotIndex + 1);
+                                } else {
+                                    return game.description;
+                                }
+                            } else {
+                                return "No description available, use game scraper to get proper information...";
+                            }
+                        }
+
+                        color: currentTheme.text
+                        font.pixelSize: Math.min(parent.height * 0.3, parent.width * 0.03)
+                        verticalAlignment: Text.AlignVCenter
+                        height: parent.height
+
+                        layer.enabled: true
+                        layer.effect: DropShadow {
+                            color: currentTheme.background
+                            radius: 3
+                            samples: 5
+                            spread: 0.5
+                        }
+
+                        NumberAnimation on x {
+                            id: scrollAnim
+                            from: clipContainer.width
+                            to: -scrollingText.width
+                            duration: Math.max(3000, scrollingText.width * 8)
+                            loops: Animation.Infinite
+                            running: gameInfoLoader.active && scrollingText.width > clipContainer.width
+                        }
+
+                        onTextChanged: {
+                            if (scrollAnim.running) {
+                                scrollAnim.restart()
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    anchors {
+                        right: parent.right
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: root.width * 0.050
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.0) }
+                        GradientStop { position: 1.0; color: currentTheme.primary }
+                    }
+                }
+
+                Rectangle {
+                    anchors {
+                        left: parent.left
+                        top: parent.top
+                        bottom: parent.bottom
+                    }
+                    width: root.width * 0.050
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: currentTheme.primary }
+                        GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.0) }
                     }
                 }
             }
