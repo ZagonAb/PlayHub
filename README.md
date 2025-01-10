@@ -48,7 +48,7 @@
 - Se agregó un nuevo componente de texto de desplazamiento dinámico para mostrar la descripción del juego.
 - Muestra el texto de la descripción del juego hasta el segundo punto seguido, utilizando una animación de desplazamiento suave si es necesario. 
 - Maneja las descripciones faltantes con un mensaje de respaldo.
-![screenshots3](https://github.com/ZagonAb/PlayHub/blob/929fd2a9da0d39b81c696ab6eeec6300a4600118/.meta/screenshots/intro.png)
+![descr](https://github.com/ZagonAb/PlayHub/blob/f67a27830033c2da68182b7f2d0e8d10b86027ad/.meta/screenshots/descr.gif)
 </details>
 
 <details>
