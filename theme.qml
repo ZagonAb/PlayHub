@@ -2065,7 +2065,7 @@ FocusScope {
                             id: scrollAnim
                             from: clipContainer.width
                             to: -scrollingText.width
-                            duration: Math.max(3000, scrollingText.width * 8)
+                            duration: Math.max(4000, scrollingText.width * 10)
                             loops: Animation.Infinite
                             running: gameInfoLoader.active && scrollingText.width > clipContainer.width
                         }
