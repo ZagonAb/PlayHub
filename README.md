@@ -46,9 +46,6 @@
 <summary>Secuencia de apertura mejorada</summary>
 
 -  Se agregaron animaciones de entrada coordinadas que presentan una transición de zoom suave y una revelación dinámica letra por letra de "PlayHub", lo que crea una experiencia de inicio atractiva.
-
-![screenshots3](https://github.com/ZagonAb/PlayHub/blob/929fd2a9da0d39b81c696ab6eeec6300a4600118/.meta/screenshots/intro.png)
-
 </details>
 
 <details>
