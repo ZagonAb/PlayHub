@@ -64,7 +64,7 @@
 - Para esta colección, se utiliza un diseño en formato grid de 3x2, empleando capturas de pantalla como elemento gráfico principal.
 - Esto se ha realizado con la intención de distinguir la colección "History" de las demás y hacerla más única y agradable de ver.
 
-![history](https://github.com/ZagonAb/PlayHub/blob/c3e6630ac93d226d9bc46121855dd568777b7f59/.meta/screenshots/history.png)
+![history](https://github.com/ZagonAb/PlayHub/blob/65e0eb15dc834c097ab1b59da58690a43ab328f7/.meta/screenshots/history.png)
 
 </details>
 
