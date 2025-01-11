@@ -308,6 +308,30 @@ FocusScope {
         }
     }
 
+    Timer {
+        id: activateTimer
+        interval: 100
+        onTriggered: {
+            gameInfoLoader.isVisible = true;
+            if (gameInfoLoader.status === Loader.Ready && gameInfoLoader.item) {
+                Qt.callLater(function() {
+                    if (gameInfoLoader.item && gameInfoLoader.item.buttonsGames) {
+                        gameInfoLoader.item.buttonsGames.forceActiveFocus();
+                    }
+                });
+            }
+        }
+    }
+
+    Timer {
+        id: deactivateTimer
+        interval: 100
+        repeat: false
+        onTriggered: {
+            gameInfoLoader.isVisible = false;
+        }
+    }
+
     readonly property var themes: {
         "blackAndWhite": {
             background: "white",
@@ -494,6 +518,13 @@ FocusScope {
         height: parent.height * 0.92
         color: currentTheme.background
         visible: true
+        y: gameInfoLoader.isVisible ? -height - bottomBar.height : 0
+        Behavior on y {
+            NumberAnimation {
+                duration: 500
+                easing.type: Easing.OutQuad
+            }
+        }
 
         Item {
             id: settingsImage
@@ -1181,6 +1212,7 @@ FocusScope {
                     gameGridView.focus = false;
                     gameInfoLoader.active = true;
                     gameInfoFocused = true;
+                    activateTimer.start();
 
                     if (gameInfoLoader.status === Loader.Ready) {
                         gameInfoLoader.item.buttonsGames.forceActiveFocus();
@@ -1628,14 +1660,32 @@ FocusScope {
         anchors.left: parent.left
         anchors.right: parent.right
         height: parent.height
-        y: active ? 0 : parent.height
+        property bool isVisible: false
         active: false
         asynchronous: true
         focus: gameInfoFocused
+        visible: active && (y < parent.height || isVisible)
+
+        y: gameInfoLoader.isVisible ? 0 : parent.height
+
+        opacity: isVisible ? 1 : 0.8
 
         Behavior on y {
             NumberAnimation {
-                duration: 300
+                id: yAnimation
+                duration: 500
+                easing.type: Easing.OutQuad
+                onRunningChanged: {
+                    if (!running && !gameInfoLoader.isVisible) {
+                        gameInfoLoader.active = false;
+                    }
+                }
+            }
+        }
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 500
                 easing.type: Easing.OutQuad
             }
         }
@@ -1874,9 +1924,7 @@ FocusScope {
                                     } else {
                                         game = null;
                                     }
-
-                                    gameInfoLoader.active = false;
-
+                                    deactivateTimer.start();
                                     if (favoriteButton) {
                                         favoriteButton.updateFavoriteState();
                                     }
