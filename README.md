@@ -65,7 +65,6 @@
 - Esto se ha realizado con la intención de distinguir la colección "History" de las demás y hacerla más única y agradable de ver.
 
 ![history](https://github.com/ZagonAb/PlayHub/blob/65e0eb15dc834c097ab1b59da58690a43ab328f7/.meta/screenshots/history.png)
-
 </details>
 
 </details>
