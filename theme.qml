@@ -635,8 +635,6 @@ FocusScope {
                 indexToPosition = currentIndex
             }
 
-            //focus: true
-
             Keys.onLeftPressed: {
                 if (collectionListView.currentIndex === 0) {
                     event.accepted = true;
@@ -833,11 +831,11 @@ FocusScope {
             property real selectedItemY: 0
             property real viewportX: contentX + width / 2
             property real viewportY: contentY + height / 2
-            cellHeight: (height) / 2
             keyNavigationEnabled: true
             keyNavigationWraps: true
             width: parent.width
-            cellWidth: parent.width / 5 -5
+            cellHeight: collectionListView.currentShortName === "history" ? height / 2 : height / 2
+            cellWidth: collectionListView.currentShortName === "history" ? parent.width / 3 - 5 : parent.width / 5 - 5
             anchors.horizontalCenterOffset: (parent.width - (Math.floor(parent.width / cellWidth) * cellWidth)) / 2
             anchors.horizontalCenter: parent.horizontalCenter
             anchors {
@@ -892,8 +890,8 @@ FocusScope {
                 border.color: currentTheme.gridviewborder
 
                 function updateOriginPoint() {
-                    if (isSelected && boxfront.status === Image.Ready) {
-                        var boxfrontItem = boxfront;
+                    if (isSelected && gameImage.status === Image.Ready) {
+                        var boxfrontItem = gameImage;
                         var boxfrontCenter = boxfrontItem.mapToItem(null,
                                                                     boxfrontItem.width * boxfrontItem.scale / 2,
                                                                     boxfrontItem.height * boxfrontItem.scale / 2);
@@ -903,7 +901,6 @@ FocusScope {
                 Item {
                     width: parent.width
                     height: parent.height
-
                     Column {
                         anchors.fill: parent
                         anchors.margins: 10
@@ -920,10 +917,14 @@ FocusScope {
                                 anchors.fill: parent
 
                                 Image {
-                                    id: boxfront
+                                    id: gameImage
                                     visible: status === Image.Ready
-                                    source: model.assets.boxFront
-                                    fillMode: Image.PreserveAspectFit
+                                    source: collectionListView.currentShortName === "history"
+                                    ? (model.assets.screenshot || model.assets.boxFront)
+                                    : model.assets.boxFront
+                                    fillMode: collectionListView.currentShortName === "history"
+                                    ? Image.Stretch
+                                    : Image.PreserveAspectFit
                                     asynchronous: true
                                     width: parent.width * 0.93
                                     height: parent.height * 0.93
@@ -946,6 +947,7 @@ FocusScope {
                                             rectanglegridview.updateOriginPoint();
                                         }
                                     }
+
                                     mipmap: true
                                     layer.enabled: isSelected
                                     layer.effect: Glow {
@@ -958,13 +960,14 @@ FocusScope {
 
                                 Item {
                                     id: favoriteIconContainer
-                                    width: parent.width * 0.17
+                                    width: collectionListView.currentShortName === "history" ?
+                                    parent.width * 0.10 : parent.width * 0.17
                                     height: parent.height * 0.17
                                     anchors {
-                                        top: boxfront.top
-                                        right: boxfront.right
-                                        topMargin: (parent.height - boxfront.paintedHeight) / 2.5
-                                        rightMargin: (parent.width - boxfront.paintedWidth) / 2.3
+                                        top: gameImage.top
+                                        right: gameImage.right
+                                        topMargin: (parent.height - gameImage.paintedHeight) / 2.5
+                                        rightMargin: (parent.width - gameImage.paintedWidth) / 2.3
                                     }
                                     Rectangle {
                                         id: favoriteIconBackground
@@ -984,7 +987,6 @@ FocusScope {
                                             anchors.fill: parent
                                             source: "assets/favorite/favorite.svg"
                                             mipmap: true
-                                            asynchronous: true
                                         }
                                         ColorOverlay {
                                             anchors.fill: favoriteIcon
@@ -993,14 +995,14 @@ FocusScope {
                                             cached: true
                                         }
                                     }
-                                    visible: model.favorite && boxfront.status === Image.Ready
+                                    visible: model.favorite && gameImage.status === Image.Ready
                                     scale: isSelected && gameGridView.focus ? 1.15 : 0.8
                                     Behavior on scale { NumberAnimation { duration: 150 } }
                                 }
 
                                 Image {
                                     id: noImage
-                                    visible: boxfront.status !== Image.Ready
+                                    visible: gameImage.status !== Image.Ready
                                     source: isSelected && gameGridView.focus ? "assets/no-image/no-image-white.png" : "assets/no-image/no-image-black.png"
                                     anchors.centerIn: parent
                                     fillMode: Image.PreserveAspectFit
@@ -1008,6 +1010,40 @@ FocusScope {
                                     width: parent.width * 0.60
                                     height: parent.height * 0.60
                                     mipmap: true
+                                }
+
+                                Column {
+                                    visible: collectionListView.currentShortName === "history"
+                                    anchors {
+                                        left: parent.left
+                                        right: parent.right
+                                        bottom: gameImage.bottom
+                                    }
+                                    spacing: 2
+
+                                    Rectangle {
+                                        width: gameImage.width
+                                        height: gameImage.height * 0.080
+                                        radius: 5
+                                        color: "#80000000"
+                                        anchors.horizontalCenter: parent.horizontalCenter
+                                        scale: isSelected && gameGridView.focus ? 1.04 : 1.0
+
+                                        Behavior on scale {
+                                            NumberAnimation {
+                                                duration: 150
+                                            }
+                                        }
+
+                                        Text {
+                                            anchors.fill: parent
+                                            text: "Last played: " + Qt.formatDateTime(model.lastPlayed, "dd/MM/yyyy")
+                                            color: "white"
+                                            font.pixelSize: Math.min(root.height * 0.02, root.width * 0.05)
+                                            horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1043,12 +1079,14 @@ FocusScope {
             }
 
             Item {
-                id: enptyCollection
+                id: emptyCollection
                 anchors.centerIn: parent
                 width: parent.width * 0.5
                 height: parent.height * 0.5
                 visible: gameGridView.count === 0
                 opacity: 0
+
+                property bool initialAnimationComplete: false
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -1095,15 +1133,37 @@ FocusScope {
                 }
 
                 Timer {
-                    id: showEmptyCollectionTimer
+                    id: initialAnimationTimer
                     interval: 5500
-                    running: gameGridView.count === 0
+                    running: true
                     repeat: false
                     onTriggered: {
-                        enptyCollection.opacity = 1
+                        emptyCollection.initialAnimationComplete = true
+                        if (gameGridView.count === 0) {
+                            emptyCollection.opacity = 1
+                        }
                     }
                 }
             }
+
+            states: [
+                State {
+                    name: "empty"
+                    when: gameGridView.count === 0 && emptyCollection.initialAnimationComplete
+                    PropertyChanges {
+                        target: emptyCollection
+                        opacity: 1
+                    }
+                },
+                State {
+                    name: "notEmpty"
+                    when: gameGridView.count > 0
+                    PropertyChanges {
+                        target: emptyCollection
+                        opacity: 0
+                    }
+                }
+            ]
 
             SoundEffect {
                 id: favSound
@@ -1966,6 +2026,36 @@ FocusScope {
                         }
                         Text {
                             text: game && game.releaseYear > 0 ? game.releaseYear.toString() : "Unknown"
+                            color: currentTheme.textSelected
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: currentTheme.background
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+
+                        Text {
+                            id: gamecollection
+                            text: "Collection:"
+                            color: currentTheme.text
+                            font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
+                            layer.enabled: true
+                            layer.effect: DropShadow {
+                                color: currentTheme.background
+                                radius: 3
+                                samples: 5
+                                spread: 0.3
+                                horizontalOffset: 0
+                                verticalOffset: 0
+                            }
+                        }
+                        Text {
+                            text: getNameCollecForGame(game)
                             color: currentTheme.textSelected
                             font.pixelSize: Math.min(root.height * 0.03, root.width * 0.06)
                             layer.enabled: true

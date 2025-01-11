@@ -60,6 +60,14 @@
 ![descr](https://github.com/ZagonAb/PlayHub/blob/f67a27830033c2da68182b7f2d0e8d10b86027ad/.meta/screenshots/descr.gif)
 </details>
 
+<details>
+<summary>Actualización del Sistema de Visualización de Juegos</summary>
+
+- Se ha implementado una visualización adaptativa que se activa al seleccionar la colección "History".
+- Para esta colección, se utiliza un diseño en formato grid de 3x2, empleando capturas de pantalla como elemento gráfico principal.
+- Esto se ha realizado con la intención de distinguir la colección "History" de las demás y hacerla más única y agradable de ver.
+</details>
+
 </details>
  
 # Licencia
