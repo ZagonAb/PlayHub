@@ -671,12 +671,16 @@ FocusScope {
             }
 
             Keys.onDownPressed: {
-                collectionListView.focus = false;
-                gameGridView.focus = true;
-                var currentIndex = gameGridView.currentIndex;
-                gameGridView.currentIndex = -1;
-                gameGridView.currentIndex = currentIndex;
-                goSound.play();
+                if (gameGridView.model && gameGridView.model.count > 0) {
+                    collectionListView.focus = false;
+                    gameGridView.focus = true;
+                    var currentIndex = gameGridView.currentIndex;
+                    gameGridView.currentIndex = -1;
+                    gameGridView.currentIndex = currentIndex;
+                    goSound.play();
+                } else {
+                    backSound.play()
+                }
             }
         }
 
@@ -1100,7 +1104,7 @@ FocusScope {
                     spacing: 10
                     Text {
                         text: "The " + collectionListView.currentShortName + " collection is empty"
-                        font.pixelSize: 20
+                        font.pixelSize: Math.min(root.height * 0.04, root.width * 0.07)
                         color: currentTheme.text
                         horizontalAlignment: Text.AlignHCenter
                     }
