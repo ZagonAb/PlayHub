@@ -314,11 +314,10 @@ FocusScope {
         onTriggered: {
             gameInfoLoader.isVisible = true;
             if (gameInfoLoader.status === Loader.Ready && gameInfoLoader.item) {
-                Qt.callLater(function() {
-                    if (gameInfoLoader.item && gameInfoLoader.item.buttonsGames) {
-                        gameInfoLoader.item.buttonsGames.forceActiveFocus();
-                    }
-                });
+                gameInfoFocused = true;
+                if (gameInfoLoader.item.buttonsGames) {
+                    gameInfoLoader.item.buttonsGames.forceActiveFocus();
+                }
             }
         }
     }
@@ -329,6 +328,7 @@ FocusScope {
         repeat: false
         onTriggered: {
             gameInfoLoader.isVisible = false;
+            gameGridView.forceActiveFocus();
         }
     }
 
@@ -535,10 +535,19 @@ FocusScope {
         color: currentTheme.background
         visible: true
         y: gameInfoLoader.isVisible ? -height - bottomBar.height : 0
+
         Behavior on y {
             NumberAnimation {
                 duration: 500
                 easing.type: Easing.OutQuad
+                onStarted: {
+                    // Quitamos el foco durante la animación
+                    if (gameInfoLoader.isVisible) {
+                        gameInfoLoader.item.buttonsGames.focus = false;
+                    } else {
+                        gameGridView.focus = false;
+                    }
+                }
             }
         }
 
@@ -1228,12 +1237,7 @@ FocusScope {
                     event.accepted = true;
                     gameGridView.focus = false;
                     gameInfoLoader.active = true;
-                    gameInfoFocused = true;
                     activateTimer.start();
-
-                    if (gameInfoLoader.status === Loader.Ready) {
-                        gameInfoLoader.item.buttonsGames.forceActiveFocus();
-                    }
                     naviSound.play();
                 }
 
@@ -1843,6 +1847,7 @@ FocusScope {
 
                     RowLayout {
                         id: buttonsGames
+
                         spacing: 10
 
                         property int currentIndex: 0
@@ -1914,6 +1919,7 @@ FocusScope {
 
                         focus: gameInfoFocused
 
+
                         Keys.onLeftPressed: {
                             if (currentIndex > 0) {
                                 currentIndex--;
@@ -1932,19 +1938,20 @@ FocusScope {
                             if (!event.isAutoRepeat) {
                                 if (api.keys.isCancel(event)) {
                                     gameInfoFocused = false;
-                                    gameGridView.focus = true;
+                                    deactivateTimer.start();
                                     naviSound.play();
                                     event.accepted = true;
 
-                                    if (gameGridView.currentIndex >= 0 && gameGridView.currentIndex < gameGridView.count) {
+                                    if (gameGridView.currentIndex >= 0 &&
+                                        gameGridView.currentIndex < gameGridView.count) {
                                         game = gameGridView.model.get(gameGridView.currentIndex);
-                                    } else {
-                                        game = null;
-                                    }
-                                    deactivateTimer.start();
-                                    if (favoriteButton) {
-                                        favoriteButton.updateFavoriteState();
-                                    }
+                                        } else {
+                                            game = null;
+                                        }
+
+                                        if (favoriteButton) {
+                                            favoriteButton.updateFavoriteState();
+                                        }
                                 }
 
                                 if (api.keys.isAccept(event)) {
