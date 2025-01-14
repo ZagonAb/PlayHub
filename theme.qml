@@ -382,6 +382,18 @@ FocusScope {
             iconColor: "#b2b6c0",
             favoriteiconColor: "#d00003"
         },
+        "grayandgray": {
+            background: "#202020",
+            primary: "#303030",
+            secondary: "#202020",
+            text: "#8b8b8b",
+            textSelected: "#b5b5b5",
+            border: "#303030",
+            gridviewborder: "#303030",
+            settingsText: "#b5b5b5",
+            iconColor: "#b5b5b5",
+            favoriteiconColor: "#d00003"
+        },
     }
 
     function applyTheme(themeName) {
@@ -401,6 +413,10 @@ FocusScope {
             case "NORDIC DARKER":
                 currentTheme = themes.nordicdarker;
                 maskImageSource = "assets/overlay/overlay2.png";
+                break;
+            case "GRAY AND GRAY":
+                currentTheme = themes.grayandgray;
+                maskImageSource = "assets/overlay/overlay3.png";
                 break;
         }
     }
@@ -776,6 +792,7 @@ FocusScope {
                         ListElement { colorOption: "DARK BREZEE" }
                         ListElement { colorOption: "BREZEE" }
                         ListElement { colorOption: "NORDIC DARKER" }
+                        ListElement { colorOption: "GRAY AND GRAY"}
                     }
 
                     delegate: Rectangle {
