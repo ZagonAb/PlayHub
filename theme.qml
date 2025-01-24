@@ -1937,10 +1937,10 @@ FocusScope {
                         Keys.onPressed: function(event) {
                             if (!event.isAutoRepeat) {
                                 if (api.keys.isCancel(event)) {
+                                    event.accepted = true
                                     gameInfoFocused = false;
                                     deactivateTimer.start();
                                     naviSound.play();
-                                    event.accepted = true;
 
                                     if (gameGridView.currentIndex >= 0 &&
                                         gameGridView.currentIndex < gameGridView.count) {
@@ -1952,6 +1952,7 @@ FocusScope {
                                         if (favoriteButton) {
                                             favoriteButton.updateFavoriteState();
                                         }
+
                                 }
 
                                 if (api.keys.isAccept(event)) {
