@@ -541,7 +541,6 @@ FocusScope {
                 duration: 500
                 easing.type: Easing.OutQuad
                 onStarted: {
-                    // Quitamos el foco durante la animación
                     if (gameInfoLoader.isVisible) {
                         gameInfoLoader.item.buttonsGames.focus = false;
                     } else {
