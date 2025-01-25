@@ -1918,7 +1918,6 @@ FocusScope {
 
                         focus: gameInfoFocused
 
-
                         Keys.onLeftPressed: {
                             if (currentIndex > 0) {
                                 currentIndex--;
