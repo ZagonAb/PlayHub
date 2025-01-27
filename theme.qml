@@ -1759,38 +1759,43 @@ FocusScope {
                 }
                 spacing: 40
 
-                Image {
-                    id: boxArt
-                    source:  game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.png"
-                    Layout.preferredWidth: root.width * 0.3
-                    Layout.preferredHeight: root.height * 0.4
-                    fillMode: Image.PreserveAspectFit
-                    asynchronous: true
+                Item {
+                    Layout.preferredWidth: root.width * 0.35
+                    Layout.fillHeight: true
 
-                    layer.enabled: true
-                    layer.effect: Glow {
-                        samples: 100
-                        color: currentTheme.textSelected
-                        spread: 0.5
-                        radius: 15
+                    Image {
+                        id: boxArt
+                        anchors.centerIn: parent
+                        width: parent.width * 0.8
+                        height: parent.height * 0.5
+                        source: game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.png"
+                        fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                        layer.enabled: true
+                        layer.effect: Glow {
+                            samples: 100
+                            color: currentTheme.textSelected
+                            spread: 0.5
+                            radius: 15
+                        }
                     }
-                }
 
-                Image {
-                    id: boxArtdefault
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 400
-                    source: "assets/no-image/defaultimage.png"
-                    fillMode: Image.PreserveAspectFit
-                    mipmap: true
-                    asynchronous: true
-                    visible: boxArt.status === Image.Error
-                    layer.enabled: true
-                    layer.effect: Glow {
-                        samples: 100
-                        color: currentTheme.textSelected
-                        spread: 0.5
-                        radius: 15
+                    Image {
+                        id: boxArtdefault
+                        anchors.centerIn: parent
+                        width: parent.width * 0.8
+                        height: parent.height * 0.5
+                        source: "assets/no-image/defaultimage.png"
+                        fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                        visible: boxArt.status === Image.Error
+                        layer.enabled: true
+                        layer.effect: Glow {
+                            samples: 100
+                            color: currentTheme.textSelected
+                            spread: 0.5
+                            radius: 15
+                        }
                     }
                 }
 
@@ -1950,7 +1955,6 @@ FocusScope {
                                         if (favoriteButton) {
                                             favoriteButton.updateFavoriteState();
                                         }
-
                                 }
 
                                 if (api.keys.isAccept(event)) {
