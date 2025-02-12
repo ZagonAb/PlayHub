@@ -15,12 +15,15 @@ FocusScope {
     property bool gameInfoFocused: false
     property bool gameInfoVisible: false
     property bool isMinimizing: false
+    property bool isVisible: false
     property var game: null
     property real iconSize: Math.min(height * 0.50, width * 0.02)
     property string currentTime: Qt.formatDateTime(new Date(), "dd-MM HH:mm")
     property var currentTheme: themes.blackAndWhite
     property string currentThemeName: api.memory.get('selectedTheme') || "BLACK AND WHITE"
     property string maskImageSource: "assets/overlay/overlay.png"
+
+    property bool isGameInfoOpen: false
 
     FontLoader {
         id: fontLoader
@@ -43,7 +46,7 @@ FocusScope {
             opacity: mainContainer.contentOpacity
 
             Image {
-                id: backgroundImage
+                id: backgroundImageGlass
                 anchors.fill: parent
                 source: "assets/overlay/glass.png"
                 fillMode: Image.PreserveAspectCrop
@@ -308,30 +311,6 @@ FocusScope {
         }
     }
 
-    Timer {
-        id: activateTimer
-        interval: 100
-        onTriggered: {
-            gameInfoLoader.isVisible = true;
-            if (gameInfoLoader.status === Loader.Ready && gameInfoLoader.item) {
-                gameInfoFocused = true;
-                if (gameInfoLoader.item.buttonsGames) {
-                    gameInfoLoader.item.buttonsGames.forceActiveFocus();
-                }
-            }
-        }
-    }
-
-    Timer {
-        id: deactivateTimer
-        interval: 100
-        repeat: false
-        onTriggered: {
-            gameInfoLoader.isVisible = false;
-            gameGridView.forceActiveFocus();
-        }
-    }
-
     readonly property var themes: {
         "blackAndWhite": {
             background: "white",
@@ -534,19 +513,12 @@ FocusScope {
         height: parent.height * 0.92
         color: currentTheme.background
         visible: true
-        y: gameInfoLoader.isVisible ? -height - bottomBar.height : 0
 
-        Behavior on y {
+        x: root.isGameInfoOpen ? -parent.width : 0
+        Behavior on x {
             NumberAnimation {
-                duration: 500
+                duration: 300
                 easing.type: Easing.OutQuad
-                onStarted: {
-                    if (gameInfoLoader.isVisible) {
-                        gameInfoLoader.item.buttonsGames.focus = false;
-                    } else {
-                        gameGridView.focus = false;
-                    }
-                }
             }
         }
 
@@ -1235,8 +1207,8 @@ FocusScope {
                 if (!event.isAutoRepeat && api.keys.isFilters(event)) {
                     event.accepted = true;
                     gameGridView.focus = false;
-                    gameInfoLoader.active = true;
-                    activateTimer.start();
+                    gameInfoFocused = true;
+                    root.isGameInfoOpen = true;
                     naviSound.play();
                 }
 
@@ -1675,43 +1647,29 @@ FocusScope {
         }
     }
 
-    Loader {
-        id: gameInfoLoader
-        anchors.left: parent.left
-        anchors.right: parent.right
+    Item {
+        id: gameInfo
+        width: parent.width
         height: parent.height
-        property bool isVisible: false
-        active: false
-        asynchronous: true
-        focus: gameInfoFocused
-        visible: active && (y < parent.height || isVisible)
-
-        y: gameInfoLoader.isVisible ? 0 : parent.height
-
-        opacity: isVisible ? 1 : 0.8
-
-        Behavior on y {
-            NumberAnimation {
-                id: yAnimation
-                duration: 500
-                easing.type: Easing.OutQuad
-                onRunningChanged: {
-                    if (!running && !gameInfoLoader.isVisible) {
-                        gameInfoLoader.active = false;
-                    }
-                }
-            }
-        }
+        visible: x < parent.width
+        opacity: root.isGameInfoOpen ? 1 : 0
 
         Behavior on opacity {
             NumberAnimation {
-                duration: 500
+                duration: 300
                 easing.type: Easing.OutQuad
             }
         }
 
-        sourceComponent: Item {
-            id: gameInfo
+        x: root.isGameInfoOpen ? 0 : parent.width
+        Behavior on x {
+            NumberAnimation {
+                duration: 300
+                easing.type: Easing.OutQuad
+            }
+        }
+
+        Item {
             anchors.fill: parent
 
             Item {
@@ -1726,7 +1684,7 @@ FocusScope {
                     width: imageContainer.width
                     height: imageContainer.height
                     source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/no-image/defaultimage.png"
-                    fillMode: Image.Stretch
+                    fillMode: Image.PreserveAspectCrop
                     mipmap: true
                     visible: true
                     asynchronous: true
@@ -1851,19 +1809,27 @@ FocusScope {
 
                     RowLayout {
                         id: buttonsGames
-
                         spacing: 10
 
                         property int currentIndex: 0
 
+                        Connections {
+                            target: root
+                            function onIsGameInfoOpenChanged() {
+                                if (root.isGameInfoOpen) {
+                                    buttonsGames.currentIndex = 0;
+                                }
+                            }
+                        }
+
                         Rectangle {
                             id: playButton
                             color: currentTheme.primary
-                            width: gameInfoLoader.width * 0.1
-                            height: parent.currentIndex === 0 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
+                            width: gameInfo.width * 0.1
+                            height: parent.currentIndex === 0 ? gameInfo.height * 0.06 : gameInfo.height * 0.05
 
                             border.color: currentTheme.textSelected
-                            radius: gameInfoLoader.width * 0.005
+                            radius: gameInfo.width * 0.005
 
                             Behavior on height {
                                 NumberAnimation { duration: 50 }
@@ -1873,17 +1839,17 @@ FocusScope {
                                 anchors.centerIn: parent
                                 text: "Launch"
                                 color: currentTheme.textSelected
-                                font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
+                                font.pixelSize: Math.min(gameInfo.height * 0.02, gameInfo.width * 0.06)
                             }
                         }
 
                         Rectangle {
                             id: favoriteButton
                             color: currentTheme.primary
-                            width: gameInfoLoader.width * 0.1
-                            height: parent.currentIndex === 1 ? gameInfoLoader.height * 0.06 : gameInfoLoader.height * 0.05
+                            width: gameInfo.width * 0.1
+                            height: parent.currentIndex === 1 ? gameInfo.height * 0.06 : gameInfo.height * 0.05
                             border.color: currentTheme.textSelected
-                            radius: gameInfoLoader.width * 0.005
+                            radius: gameInfo.width * 0.005
 
                             Behavior on height {
                                 NumberAnimation { duration: 50 }
@@ -1891,12 +1857,28 @@ FocusScope {
 
                             property bool isFavorite: false
 
-                            Component.onCompleted: {
-                                updateFavoriteState();
+                            Connections {
+                                target: root
+                                function onGameChanged() {
+                                    favoriteButton.updateFavoriteState();
+                                }
+                            }
+
+                            Connections {
+                                target: gameInfo
+                                function onVisibleChanged() {
+                                    if (gameInfo.visible) {
+                                        favoriteButton.updateFavoriteState();
+                                    }
+                                }
                             }
 
                             function updateFavoriteState() {
-                                if (!game) return;
+                                if (!game) {
+                                    isFavorite = false;
+                                    return;
+                                }
+
                                 var collectionName = getNameCollecForGame(game);
                                 for (var i = 0; i < api.collections.count; ++i) {
                                     var collection = api.collections.get(i);
@@ -1905,19 +1887,20 @@ FocusScope {
                                             var currentGame = collection.games.get(j);
                                             if (currentGame.title === game.title) {
                                                 isFavorite = currentGame.favorite;
-                                                break;
+                                                return;
                                             }
                                         }
                                         break;
                                     }
                                 }
+                                isFavorite = false;
                             }
 
                             Text {
                                 anchors.centerIn: parent
                                 text: favoriteButton.isFavorite ? "Favorite -" : "Favorite +"
                                 color: currentTheme.textSelected
-                                font.pixelSize: Math.min(gameInfoLoader.height * 0.02, gameInfoLoader.width * 0.06)
+                                font.pixelSize: Math.min(gameInfo.height * 0.02, gameInfo.width * 0.06)
                             }
                         }
 
@@ -1940,9 +1923,10 @@ FocusScope {
                         Keys.onPressed: function(event) {
                             if (!event.isAutoRepeat) {
                                 if (api.keys.isCancel(event)) {
-                                    event.accepted = true
+                                    event.accepted = true;
                                     gameInfoFocused = false;
-                                    deactivateTimer.start();
+                                    root.isGameInfoOpen = false;
+                                    gameGridView.forceActiveFocus();
                                     naviSound.play();
 
                                     if (gameGridView.currentIndex >= 0 &&
@@ -2236,7 +2220,7 @@ FocusScope {
                             to: -scrollingText.width
                             duration: Math.max(4000, scrollingText.width * 10)
                             loops: Animation.Infinite
-                            running: gameInfoLoader.active && scrollingText.width > clipContainer.width
+                            running: root.isGameInfoOpen && scrollingText.width > clipContainer.width
                         }
 
                         onTextChanged: {
