@@ -67,6 +67,13 @@
 ![history](https://github.com/ZagonAb/PlayHub/blob/65e0eb15dc834c097ab1b59da58690a43ab328f7/.meta/screenshots/history.png)
 </details>
 
+<details>
+<summary>Optimización de animaciones y eliminación de loader</summary>
+
+- Se eliminó el loader y se simplificó la animación de container en gameInfo para mejorar la experiencia del usuario.
+
+</details>
+
 </details>
  
 # Licencia
