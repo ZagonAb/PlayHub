@@ -2182,7 +2182,6 @@ FocusScope {
                         leftMargin: 10
                         fill: parent
                     }
-
                     clip: true
 
                     Text {
@@ -2206,6 +2205,10 @@ FocusScope {
                         verticalAlignment: Text.AlignVCenter
                         height: parent.height
 
+                        property bool shouldScroll: width > clipContainer.width
+
+                        x: shouldScroll ? clipContainer.width : 10
+
                         layer.enabled: true
                         layer.effect: DropShadow {
                             color: currentTheme.background
@@ -2216,16 +2219,20 @@ FocusScope {
 
                         NumberAnimation on x {
                             id: scrollAnim
-                            from: clipContainer.width
-                            to: -scrollingText.width
+                            from: scrollingText.shouldScroll ? clipContainer.width : 10
+                            to: scrollingText.shouldScroll ? -scrollingText.width : 10
                             duration: Math.max(4000, scrollingText.width * 10)
                             loops: Animation.Infinite
-                            running: root.isGameInfoOpen && scrollingText.width > clipContainer.width
+                            running: root.isGameInfoOpen && scrollingText.shouldScroll
                         }
 
                         onTextChanged: {
                             if (scrollAnim.running) {
                                 scrollAnim.restart()
+                            }
+
+                            if (!shouldScroll) {
+                                x = 10
                             }
                         }
                     }
@@ -2243,6 +2250,8 @@ FocusScope {
                         GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.0) }
                         GradientStop { position: 1.0; color: currentTheme.primary }
                     }
+
+                    visible: scrollingText.shouldScroll
                 }
 
                 Rectangle {
@@ -2257,6 +2266,7 @@ FocusScope {
                         GradientStop { position: 0.0; color: currentTheme.primary }
                         GradientStop { position: 1.0; color: Qt.rgba(0, 0, 0, 0.0) }
                     }
+                    visible: scrollingText.shouldScroll
                 }
             }
         }
