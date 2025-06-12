@@ -4,16 +4,13 @@ import SortFilterProxyModel 0.2
 Item {
     id: gamesGridModel
 
-    // Propiedades que necesitan ser accesibles desde fuera
     property var currentTheme
-    property var rootItem: null  // Referencia al componente raíz
+    property var rootItem: null
 
-    // Función para obtener el modelo actual
     function getCurrentModel() {
         return gameGridView.model
     }
 
-    // Función para manejar el cambio de favorito
     function toggleFavorite(game) {
         if (!game) return
 
