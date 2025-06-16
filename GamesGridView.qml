@@ -500,6 +500,11 @@ GridView {
                         }
                     }
                 }
+            else if (api.keys.isFilters(event)) {
+                event.accepted = true;
+                root.searchVisible = true;
+                soundEffects.play("go");
+            }
         }
 
         if (api.keys.isNextPage(event)) {

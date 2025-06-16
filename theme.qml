@@ -24,6 +24,7 @@ FocusScope {
     property bool isGameInfoOpen: false
     property alias launchTimer: launchTimer
     property bool focusEnabled: false
+    property bool searchVisible: false
 
     Connections {
         target: gameInfo
@@ -349,12 +350,12 @@ FocusScope {
         "light": {
             background: "#f5f5f5",
             primary: "#f0f0f0",
-            secondary: "#e0e0e0",
+            secondary: "#c1c1c1",
             text: "#333333",
             textSelected: "#000000",
             buttomText: "#333333",
             border: "#c0c0c0",
-            gridviewborder: "#a0a0a0",
+            gridviewborder: "#424242",
             settingsText: "#333333",
             iconColor: "#555555",
             favoriteiconColor: "#d00003",
@@ -590,6 +591,41 @@ FocusScope {
                 anchors.rightMargin: 20
                 spacing: 20
                 visible: !settingsIconSelected
+
+                Row {
+                    spacing: 5
+                    visible: true
+                    Rectangle {
+                        width: bottomBar.iconSize
+                        height: bottomBar.iconSize
+                        color: "transparent"
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        Image {
+                            id: searchicon
+                            anchors.fill: parent
+                            source: "assets/control/search.svg"
+                            visible: false
+                            mipmap: true
+                            asynchronous: true
+                        }
+
+                        ColorOverlay {
+                            anchors.fill: searchicon
+                            source: searchicon
+                            color: currentTheme.iconColor
+                            cached: true
+                        }
+                    }
+
+                    Text {
+                        text: " SEARCH"
+                        color: currentTheme.text
+                        font.bold: true
+                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                        anchors.verticalCenter: parent.verticalCenter
+                    }
+                }
 
                 Row {
                     spacing: 5
@@ -867,6 +903,122 @@ FocusScope {
         property var root: root
         property var gameGridView: gameGridView
         property var soundEffects: soundEffects
+    }
+
+    Rectangle {
+        id: searchOverlay
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.95)
+        visible: searchVisible
+        z: 1000
+        property var lastFocusedItem: null
+
+        onVisibleChanged: {
+            if (visible) {
+                searchResultsView.resetRandomGames();
+                lastFocusedItem = focusManager.currentFocus;
+                focusManager.setFocus("search", "games");
+                keyboard.forceActiveFocus();
+            } else {
+                resetSearch();
+                if (lastFocusedItem) {
+                    focusManager.setFocus(lastFocusedItem, "search");
+                }
+            }
+        }
+
+        Timer {
+            id: focusTimer2
+            interval: 100
+            onTriggered: {
+                keyboard.forceActiveFocus()
+            }
+        }
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {}
+        }
+        Column {
+            anchors.fill: parent
+            anchors.margins: 20
+            spacing: 20
+            SearchBar {
+                id: searchBar
+                width: parent.width * 0.6
+                anchors.horizontalCenter: parent.horizontalCenter
+                currentTheme: root.currentTheme
+            }
+            Row {
+                width: parent.width * 0.9
+                height: parent.height * 0.4
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 20
+
+                LastPlayedList {
+                    id: lastPlayedList
+                    height: parent.height
+                    width: parent.width * 0.3
+                    currentTheme: root.currentTheme
+                }
+
+                Keyboard {
+                    id: keyboard
+                    height: parent.height
+                    width: parent.width * 0.7 - 20
+                    currentTheme: root.currentTheme
+                    onKeySelected: function(key) {
+                        if (key === "") {
+                            searchBar.text = ""
+                        } else {
+                            searchBar.text += key
+                        }
+                    }
+                    onCloseRequested: {
+                        searchVisible = false
+                    }
+                }
+            }
+
+            SearchResultsView {
+                id: searchResultsView
+                width: parent.width
+                height: parent.height * 0.45
+                currentTheme: root.currentTheme
+            }
+        }
+        Keys.onPressed: {
+            if (api.keys.isCancel(event)) {
+                event.accepted = true
+                searchVisible = false
+                if (typeof soundEffects !== 'undefined') soundEffects.play("back")
+            }
+        }
+
+        function handleMouseFocusChange(newFocus) {
+            if (newFocus === "searchBar") {
+                searchBar.forceActiveFocus()
+                keyboard.forceActiveFocus()
+            } else if (newFocus === "lastPlayed") {
+                lastPlayedList.forceActiveFocus()
+                lastPlayedList.currentIndex = 0
+                keyboard.resetKeyboard()
+            } else if (newFocus === "searchResults") {
+                searchResultsView.forceActiveFocus()
+                searchResultsView.currentIndex = 0
+                keyboard.resetKeyboard()
+            }
+        }
+    }
+
+    function resetSearch() {
+        searchBar.text = "";
+        searchResultsView.filter = "";
+        searchResultsView.currentIndex = -1;
+        if (lastPlayedList.count > 0) {
+            lastPlayedList.currentIndex = 0;
+        }
+        keyboard.currentRow = 0;
+        keyboard.currentCol = 0;
     }
 
     function toggleFavorite(game) {

@@ -72,6 +72,14 @@ Item {
                 if (settingsImage) settingsImage.focus = false;
                 currentFocus = "gamedetails";
             break;
+
+            case "search":
+                if (collectionListView) collectionListView.focus = false;
+                if (gameGridView) gameGridView.focus = false;
+                if (gameInfo) gameInfo.focus = false;
+                if (settingsImage) settingsImage.focus = false;
+                currentFocus = "search";
+            break;
         }
 
         //logFocus("Focus changed to " + target);

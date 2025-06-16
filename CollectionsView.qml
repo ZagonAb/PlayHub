@@ -195,6 +195,19 @@ ListView {
         }
     }
 
+    /*Keys.onPressed: {
+        if (api.keys.isNextPage(event)) {
+            event.accepted = true;
+            collectionListView.incrementCurrentIndex();
+            soundEffects.play("navi");
+        }
+        if (api.keys.isPrevPage(event)) {
+            event.accepted = true;
+            collectionListView.decrementCurrentIndex();
+            soundEffects.play("navi");
+        }
+    }*/
+
     Keys.onPressed: {
         if (api.keys.isNextPage(event)) {
             event.accepted = true;
@@ -205,6 +218,11 @@ ListView {
             event.accepted = true;
             collectionListView.decrementCurrentIndex();
             soundEffects.play("navi");
+        }
+        if (api.keys.isFilters(event)) {
+            event.accepted = true;
+            root.searchVisible = true;
+            soundEffects.play("go");
         }
     }
 }
