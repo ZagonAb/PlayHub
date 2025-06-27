@@ -10,5 +10,5 @@
 ![screen3](https://github.com/ZagonAb/PlayHub/blob/b4e87bb1579a1c8f4903669e83e24600a39528af/.meta/screenshots/screen3.png)
 ![screen4](https://github.com/ZagonAb/PlayHub/blob/61e9a3d74354856ecd935405314f9bdfc287bfee/.meta/screenshots/screen4.png)
  
-# Licencia
+# License
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br /><a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"></a>
