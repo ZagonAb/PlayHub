@@ -26,6 +26,7 @@ FocusScope {
     property bool focusEnabled: false
     property bool searchVisible: false
 
+
     Connections {
         target: gameInfo
         function onVisibleChanged() {
@@ -135,14 +136,16 @@ FocusScope {
                     y: -100
                     opacity: 0
                     style: Text.Outline
-                    styleColor: "black"
+                    styleColor: "#80000000"
+
                     layer.enabled: true
                     layer.effect: DropShadow {
-                        horizontalOffset: 3
-                        verticalOffset: 3
-                        radius: 20
-                        samples: 20
-                        color: "black"
+                        horizontalOffset: 4
+                        verticalOffset: 4
+                        radius: 30
+                        samples: 50
+                        color: "#A0000000"
+                        spread: 0.5
                     }
 
                     property real finalX: textContainer.baseX + textContainer.letterSpacings[text]
@@ -240,9 +243,10 @@ FocusScope {
                 layer.effect: DropShadow {
                     horizontalOffset: 3
                     verticalOffset: 3
-                    radius: 20
-                    samples: 20
+                    radius: 30
+                    samples: 40
                     color: "black"
+                    spread: 0.5
                 }
 
                 SequentialAnimation {
@@ -362,7 +366,7 @@ FocusScope {
             gradientColor: "#e8e8e8"
         },
         "dark": {
-            background: "#1a1a1a",
+            background: "#141618",
             primary: "#1f1f1f",
             secondary: "#363636",
             text: "#a8a8a6",
@@ -373,7 +377,7 @@ FocusScope {
             settingsText: "#a8a8a6",
             iconColor: "#a8a8a6",
             favoriteiconColor: "#d00003",
-            gradientColor: "#1a1a1a"
+            gradientColor: "#141618"
         }
     }
 
@@ -452,6 +456,7 @@ FocusScope {
         color: currentTheme.background
         visible: true
         x: root.isGameInfoOpen ? -parent.width : 0
+
         Behavior on x {
             NumberAnimation {
                 duration: 300
@@ -469,19 +474,29 @@ FocusScope {
             Keys.enabled: root.focusEnabled
             focus: settingsIconFocused
 
+            property bool animatingTheme: false
+
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleTheme()
+                z: 100
+                onClicked: {
+                    console.log("MouseArea clicked!")
+                    if (!settingsImage.animatingTheme) {
+                        settingsImage.animateThemeChange()
+                    }
+                }
             }
 
             Rectangle {
                 id: iconWrapper
                 anchors.centerIn: parent
-                width: parent.width * 0.5
-                height: parent.height * 0.5
-                color: settingsIconFocused ? Qt.rgba(1, 1, 1, 0.1) : "transparent"
+                property real circleSize: Math.min(parent.width, parent.height) * 0.5
+                width: circleSize
+                height: circleSize
+
+                color: settingsIconFocused ? Qt.rgba(0, 0, 0, 0.2) : "transparent"
                 radius: width / 2
                 scale: settingsIconFocused ? 1.3 : 1.0
 
@@ -495,31 +510,108 @@ FocusScope {
                 Image {
                     id: settingsIcon
                     anchors.fill: parent
+                    anchors.margins: parent.width * 0.01
                     source: root.currentTheme === themes.light ? "assets/setting/light.svg" : "assets/setting/dark.svg"
                     fillMode: Image.PreserveAspectFit
                     visible: false
+                    mipmap: true
+                    transform: Rotation {
+                        id: iconRotation
+                        origin.x: settingsIcon.width / 2
+                        origin.y: settingsIcon.height / 2
+                        angle: 0
+                    }
                 }
 
                 ColorOverlay {
                     id: iconOverlay
                     anchors.fill: settingsIcon
+                    anchors.margins: parent.width * 0.15
                     source: settingsIcon
                     color: currentTheme.iconColor
                     visible: true
                     cached: true
-
                     Behavior on color {
                         ColorAnimation {
-                            duration: 150
+                            duration: 300
+                            easing.type: Easing.InOutQuad
                         }
                     }
+                }
+            }
+
+            SequentialAnimation {
+                id: themeChangeAnimation
+
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: iconRotation
+                        property: "angle"
+                        from: 0
+                        to: 180
+                        duration: 300
+                        easing.type: Easing.InOutQuad
+                    }
+                    NumberAnimation {
+                        target: iconWrapper
+                        property: "scale"
+                        from: iconWrapper.scale
+                        to: iconWrapper.scale * 0.8
+                        duration: 150
+                        easing.type: Easing.InQuad
+                    }
+                }
+
+                ScriptAction {
+                    script: {
+                        root.toggleTheme()
+                    }
+                }
+
+                ParallelAnimation {
+                    NumberAnimation {
+                        target: iconRotation
+                        property: "angle"
+                        from: 180
+                        to: 360
+                        duration: 300
+                        easing.type: Easing.InOutQuad
+                    }
+                    NumberAnimation {
+                        target: iconWrapper
+                        property: "scale"
+                        from: iconWrapper.scale * 0.8
+                        to: settingsIconFocused ? 1.3 : 1.0
+                        duration: 150
+                        easing.type: Easing.OutQuad
+                    }
+                }
+
+                ScriptAction {
+                    script: {
+                        iconRotation.angle = 0
+                        settingsImage.animatingTheme = false
+                        console.log("Animation completed, animatingTheme:", settingsImage.animatingTheme)
+                    }
+                }
+            }
+
+            function animateThemeChange() {
+                if (!animatingTheme) {
+                    console.log("Starting animation, animatingTheme:", animatingTheme)
+                    animatingTheme = true
+                    themeChangeAnimation.start()
+                } else {
+                    console.log("Animation already running, ignoring")
                 }
             }
 
             Keys.onPressed: {
                 if (api.keys.isAccept(event)) {
                     event.accepted = true;
-                    root.toggleTheme();
+                    if (!animatingTheme) {
+                        animateThemeChange();
+                    }
                 }
                 if (api.keys.isCancel(event) || event.key === Qt.Key_Right) {
                     event.accepted = true;
@@ -528,8 +620,6 @@ FocusScope {
                     soundEffects.play("back");
                 }
             }
-
-
             onFocusChanged: {
                 if (focus) {
                     settingsIconFocused = true;
@@ -543,6 +633,7 @@ FocusScope {
             id: collectionListView
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
+            height: parent.height * 0.15
             Keys.enabled: root.focusEnabled
         }
 
@@ -558,6 +649,8 @@ FocusScope {
                 top: collectionListView.bottom
                 topMargin: 10
                 bottom: parent.bottom
+                left: parent.left
+                right: parent.right
             }
             currentShortName: collectionListView.currentShortName
             rootItem: root
@@ -760,7 +853,7 @@ FocusScope {
                     }
 
                     Text {
-                        text: "PREV COLLECTION"
+                        text: "PREV"
                         color: currentTheme.text
                         font.bold: true
                         font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
@@ -795,7 +888,7 @@ FocusScope {
                     }
 
                     Text {
-                        text: "NEXT COLLECTION"
+                        text: "NEXT"
                         color: currentTheme.text
                         font.bold: true
                         font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
@@ -848,49 +941,133 @@ FocusScope {
                 }
             }
 
-            Row{
-                anchors.verticalCenter: parent.verticalCenter
+            Item {
+                id: infoSection
+                width: parent.width * 0.45
+                height: parent.height
                 anchors.left: parent.left
-                spacing: 2
-                visible: true
-
-                Rectangle {
-                    width: 5
-                    height: 1
-                    color: "transparent"
-                }
 
                 Row {
-                    spacing: 5
-                    Timer {
-                        id: clockTimer
-                        interval: 1000
-                        running: true
-                        repeat: true
-                        onTriggered: {
-                            currentTime = Qt.formatDateTime(new Date(), "dd-MM HH:mm")
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 15
+
+                    Row {
+                        spacing: 5
+                        id: timeThemeRow
+
+                        Rectangle {
+                            width: timeText.width + themeText.width + 20
+                            height: bottomBar.height * 0.6
+                            radius: height/2
+                            color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.05)
+                            border.color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.2)
+                            border.width: 1
+
+                            Row {
+                                anchors.centerIn: parent
+                                spacing: 5
+
+                                Text {
+                                    id: timeText
+                                    text: currentTime
+                                    color: currentTheme.text
+                                    font.bold: true
+                                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Rectangle {
+                                    width: 1
+                                    height: timeText.height * 0.6
+                                    color: currentTheme.text
+                                    opacity: 0.5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                Text {
+                                    id: themeText
+                                    text: currentTheme === themes.light ? "LIGHT" : "DARK"
+                                    color: currentTheme.text
+                                    font.bold: true
+                                    font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                                    anchors.verticalCenter: parent.verticalCenter
+
+                                    SequentialAnimation on opacity {
+                                        running: true
+                                        loops: Animation.Infinite
+                                        NumberAnimation { from: 0.8; to: 1; duration: 2000; easing.type: Easing.InOutSine }
+                                        NumberAnimation { from: 1; to: 0.8; duration: 2000; easing.type: Easing.InOutSine }
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    Text {
-                        text: currentTime + " | " + (currentTheme === themes.light ? "LIGHT" : "DARK")
-                        color: currentTheme.text
-                        font.bold: true
-                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
-                }
+                    Rectangle {
+                        width: collectionText.width + 20
+                        height: bottomBar.height * 0.6
+                        radius: height/2
+                        color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.05)
+                        border.color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.2)
+                        border.width: 1
+                        visible: collectionListView.currentCollectionName !== ""
 
-                Row {
-                    spacing: 5
-                    Text {
-                        text: "| Games: " + (gameGridView.count > 0 ? (gameGridView.currentIndex + 1) + "/" + gameGridView.count : "0/0 ")
-                        font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
-                        color: currentTheme.text
-                        font.bold: true
-                        anchors.verticalCenter: parent.verticalCenter
+                        Text {
+                            id: collectionText
+                            text: collectionListView.currentCollectionName
+                            anchors.centerIn: parent
+                            font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                            color: currentTheme.text
+                            font.bold: true
+                            elide: Text.ElideRight
+                            maximumLineCount: 1
+                            width: Math.min(implicitWidth, infoSection.width * 0.3)
+                        }
+
+                        SequentialAnimation on scale {
+                            running: collectionListView.activeFocus
+                            loops: Animation.Infinite
+                            NumberAnimation { from: 1.0; to: 1.02; duration: 1000; easing.type: Easing.InOutSine }
+                            NumberAnimation { from: 1.02; to: 1.0; duration: 1000; easing.type: Easing.InOutSine }
+                        }
+                    }
+
+                    Rectangle {
+                        width: gamesText.width + 20
+                        height: bottomBar.height * 0.6
+                        radius: height/2
+                        color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.05)
+                        border.color: Qt.rgba(currentTheme.textSelected.r, currentTheme.textSelected.g, currentTheme.textSelected.b, 0.2)
+                        border.width: 1
+                        visible: gameGridView.count > 0
+
+                        Text {
+                            id: gamesText
+                            text: "Games: " + (gameGridView.count > 0 ? (gameGridView.currentIndex + 1) + "/" + gameGridView.count : "0/0")
+                            anchors.centerIn: parent
+                            font.pixelSize: Math.min(bottomBar.height / 4, bottomBar.width / 40)
+                            color: currentTheme.text
+                            font.bold: true
+                        }
+
+                        SequentialAnimation on scale {
+                            running: gameGridView.activeFocus
+                            loops: Animation.Infinite
+                            NumberAnimation { from: 1.0; to: 1.02; duration: 1000; easing.type: Easing.InOutSine }
+                            NumberAnimation { from: 1.02; to: 1.0; duration: 1000; easing.type: Easing.InOutSine }
+                        }
                     }
                 }
+            }
+        }
+
+        Timer {
+            id: clockTimer
+            interval: 1000
+            running: true
+            repeat: true
+            onTriggered: {
+                currentTime = Qt.formatDateTime(new Date(), "dd-MM HH:mm")
             }
         }
     }

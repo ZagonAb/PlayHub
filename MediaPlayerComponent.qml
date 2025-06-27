@@ -267,6 +267,30 @@ FocusScope {
                         asynchronous: true
                         mipmap: true
                         smooth: true
+                        layer.enabled: true
+                        layer.effect: true ? glowEffect : dropShadowEffect
+
+                        Component {
+                            id: glowEffect
+                            Glow {
+                                samples: 30
+                                color: "white"
+                                spread: 0.2
+                                radius: 6
+                            }
+                        }
+
+                        Component {
+                            id: dropShadowEffect
+                            DropShadow {
+                                transparentBorder: true
+                                horizontalOffset: 2
+                                verticalOffset: 2
+                                radius: 6
+                                samples: 16
+                                color: "#80000000"
+                            }
+                        }
                     }
 
                     Rectangle {

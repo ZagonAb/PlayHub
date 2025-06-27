@@ -32,13 +32,7 @@ GridView {
         }
     }
 
-    anchors {
-        top: parent.top
-        bottom: parent.bottom
-        horizontalCenter: parent.horizontalCenter
-    }
     clip: true
-
     keyNavigationEnabled: true
     keyNavigationWraps: true
 
@@ -83,13 +77,33 @@ GridView {
 
                     Image {
                         id: gameImage
-                        visible: status === Image.Ready
+                        visible: false
                         source: model.assets.screenshot || ""
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         width: parent.width * 0.93
                         height: parent.height * 0.93
                         anchors.centerIn: parent
+                        mipmap: true
+                    }
+
+                    Rectangle {
+                        id: roundedMask
+                        width: gameImage.width
+                        height: gameImage.height
+                        anchors.centerIn: parent
+                        radius: 15
+                        visible: false
+                    }
+
+                    OpacityMask {
+                        id: maskedImage
+                        width: gameImage.width
+                        height: gameImage.height
+                        anchors.centerIn: parent
+                        source: gameImage
+                        maskSource: roundedMask
+                        visible: gameImage.status === Image.Ready
                         scale: isSelected && gameGridView.focus ? 1.04 : 1.0
 
                         Behavior on scale {
@@ -103,19 +117,21 @@ GridView {
                             }
                         }
 
-                        onStatusChanged: {
-                            if (status === Image.Ready && isSelected) {
-                                rectanglegridview.updateOriginPoint()
-                            }
-                        }
-
-                        mipmap: true
                         layer.enabled: isSelected
                         layer.effect: Glow {
                             samples: 100
                             color: root.currentTheme.gridviewborder
                             spread: 0.5
                             radius: 22
+                        }
+                    }
+
+                    Connections {
+                        target: gameImage
+                        function onStatusChanged() {
+                            if (gameImage.status === Image.Ready && isSelected) {
+                                rectanglegridview.updateOriginPoint()
+                            }
                         }
                     }
 
@@ -138,10 +154,10 @@ GridView {
                         Component {
                             id: glowEffect
                             Glow {
-                                samples: 50
-                                color: root.currentTheme.textSelected
-                                spread: 0.3
-                                radius: 15
+                                samples: 30
+                                color: "white"
+                                spread: 0.2
+                                radius: 8
                             }
                         }
 
@@ -181,13 +197,13 @@ GridView {
 
                     Rectangle {
                         id: titleContainer
-                        width: gameImage.width
-                        height: gameImage.height * 0.15
-                        radius: 5
+                        width: maskedImage.width
+                        height: maskedImage.height * 0.15
+                        radius: 15
                         color: "#AA000000"
                         anchors {
-                            bottom: gameImage.bottom
-                            horizontalCenter: gameImage.horizontalCenter
+                            bottom: maskedImage.bottom
+                            horizontalCenter: maskedImage.horizontalCenter
                         }
                         opacity: isSelected ? 1 : 0
                         visible: opacity > 0
@@ -230,18 +246,18 @@ GridView {
 
                     Item {
                         id: topElementsContainer
-                        width: gameImage.width
-                        height: gameImage.height * 0.15
+                        width: maskedImage.width
+                        height: maskedImage.height * 0.15
                         anchors {
-                            top: gameImage.top
-                            horizontalCenter: gameImage.horizontalCenter
+                            top: maskedImage.top
+                            horizontalCenter: maskedImage.horizontalCenter
                         }
 
                         Rectangle {
                             id: lastPlayedContainer
                             width: parent.width * 0.7
                             height: parent.height
-                            radius: 5
+                            radius: 15
                             color: "#AA000000"
                             anchors {
                                 horizontalCenter: parent.horizontalCenter

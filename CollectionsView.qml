@@ -5,15 +5,20 @@ import QtGraphicalEffects 1.12
 ListView {
     id: collectionListView
     width: parent.width * 0.90
-    height: 60
     model: collectionsModel.getModel()
     orientation: Qt.Horizontal
     spacing: 5
     clip: true
     anchors.top: parent.top
+    anchors.topMargin: parent.height * 0.01
     anchors.horizontalCenter: parent.horizontalCenter
     property string currentShortName: ""
+    property string currentCollectionName: ""
     property int indexToPosition: -1
+
+    ColorMapping {
+        id: colorMapping
+    }
 
     Item {
         id: gradientOverlay
@@ -40,39 +45,41 @@ ListView {
             if (!root || !collectionListView) return 100;
 
             if (index === collectionListView.currentIndex && collectionListView.focus) {
-                return root.width * 0.100;
+                return root.width * 0.150;
             } else if (Math.abs(index - collectionListView.currentIndex) === 1) {
                 return root.width * 0.075;
             } else {
                 return root.width * 0.070;
             }
         }
-        height: root.height * 0.04
+        height: collectionListView.height
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined
 
         Behavior on width {
             NumberAnimation { duration: 300; easing.type: Easing.OutQuad }
         }
 
+
         Rectangle {
             id: bg
             anchors.fill: parent
-            color: index === collectionListView.currentIndex && collectionListView.focus ?
-            currentTheme.secondary : currentTheme.background
+            color: "transparent"
             border.color: currentTheme.secondary
             border.width: 2
-            radius: 10
+            radius: 15
 
             gradient: Gradient {
                 GradientStop {
                     position: 0.0;
-                    color: Qt.lighter(index === collectionListView.currentIndex && collectionListView.focus ?
-                    currentTheme.secondary : currentTheme.background, 1.1)
+                    color: {
+                        var customColor = colorMapping.colorMap[model.shortName.toLowerCase()];
+                        return customColor ? customColor : (index === collectionListView.currentIndex && collectionListView.focus ?
+                        currentTheme.secondary : currentTheme.background);
+                    }
                 }
                 GradientStop {
                     position: 1.0;
-                    color: index === collectionListView.currentIndex && collectionListView.focus ?
-                    currentTheme.secondary : currentTheme.background
+                    color: currentTheme.background
                 }
             }
 
@@ -81,33 +88,39 @@ ListView {
             }
         }
 
-        Text {
-            id: collectionname
-            anchors.centerIn: parent
-            text: model.shortName.toUpperCase()
-            color: index === collectionListView.currentIndex && collectionListView.focus ?
-            currentTheme.textSelected : currentTheme.text
-            font.bold: true
-            font.pixelSize: parent ? parent.width * 0.14 : 12
 
-            SequentialAnimation on opacity {
-                running: index === collectionListView.currentIndex && collectionListView.focus
-                loops: Animation.Infinite
-                NumberAnimation { from: 0.9; to: 1; duration: 1200; easing.type: Easing.InOutSine }
-                NumberAnimation { from: 1; to: 0.9; duration: 1200; easing.type: Easing.InOutSine }
+        Item {
+            anchors.centerIn: parent
+            width: parent.width * 0.9
+            height: parent.height * 0.9
+
+            Image {
+                id: collectionLogo
+                anchors.fill: parent
+                source: model.shortName ? "assets/logos/" + model.shortName.toLowerCase() + ".png" : ""
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+                visible: status === Image.Ready
+                mipmap: true
+                layer.enabled: true
+                layer.effect: Glow {
+                    samples: 16
+                    color: Qt.rgba(currentTheme.background.r, currentTheme.background.g, currentTheme.background.b,
+                                    index === collectionListView.currentIndex && collectionListView.focus ? 0.3 : 0)
+                    radius: index === collectionListView.currentIndex && collectionListView.focus ? 10 : 0
+                    spread: 0.4
+                }
             }
 
-            layer.enabled: true
-            layer.effect: Glow {
-                samples: 16
-                color: Qt.rgba(currentTheme.primary.r, currentTheme.primary.g, currentTheme.primary.b,
-                               index === collectionListView.currentIndex && collectionListView.focus ? 0.3 : 0)
-                radius: index === collectionListView.currentIndex && collectionListView.focus ? 10 : 0
-                spread: 0.2
-
-                Behavior on radius {
-                    NumberAnimation { duration: 300; easing.type: Easing.OutQuad }
-                }
+            Text {
+                id: collectionname
+                anchors.centerIn: parent
+                text: model.shortName.toUpperCase()
+                color: index === collectionListView.currentIndex && collectionListView.focus ?
+                currentTheme.textSelected : currentTheme.text
+                font.bold: true
+                font.pixelSize: parent.height * 0.1
+                visible: collectionLogo.status !== Image.Ready
             }
         }
 
@@ -161,6 +174,7 @@ ListView {
         const selectedCollection = model.get(currentIndex)
         gameGridView.model = model.get(currentIndex).games;
         currentShortName = selectedCollection.shortName
+        currentCollectionName = selectedCollection.name
         indexToPosition = currentIndex
     }
 
@@ -194,19 +208,6 @@ ListView {
             soundEffects.play("back");
         }
     }
-
-    /*Keys.onPressed: {
-        if (api.keys.isNextPage(event)) {
-            event.accepted = true;
-            collectionListView.incrementCurrentIndex();
-            soundEffects.play("navi");
-        }
-        if (api.keys.isPrevPage(event)) {
-            event.accepted = true;
-            collectionListView.decrementCurrentIndex();
-            soundEffects.play("navi");
-        }
-    }*/
 
     Keys.onPressed: {
         if (api.keys.isNextPage(event)) {
