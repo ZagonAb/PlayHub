@@ -366,8 +366,8 @@ FocusScope {
             gradientColor: "#e8e8e8"
         },
         "dark": {
-            background: "#141618",
-            primary: "#1f1f1f",
+            background: "#0e1011",
+            primary: "#1d1d1d",
             secondary: "#363636",
             text: "#a8a8a6",
             textSelected: "white",
@@ -1125,8 +1125,9 @@ FocusScope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 currentTheme: root.currentTheme
             }
+
             Row {
-                width: parent.width * 0.9
+                width: parent.width * 0.95
                 height: parent.height * 0.4
                 anchors.horizontalCenter: parent.horizontalCenter
                 spacing: 20
@@ -1134,14 +1135,14 @@ FocusScope {
                 LastPlayedList {
                     id: lastPlayedList
                     height: parent.height
-                    width: parent.width * 0.3
+                    width: parent.width * 0.35
                     currentTheme: root.currentTheme
                 }
 
                 Keyboard {
                     id: keyboard
                     height: parent.height
-                    width: parent.width * 0.7 - 20
+                    width: parent.width * 0.30
                     currentTheme: root.currentTheme
                     onKeySelected: function(key) {
                         if (key === "") {
@@ -1153,6 +1154,13 @@ FocusScope {
                     onCloseRequested: {
                         searchVisible = false
                     }
+                }
+
+                FavoriteList {
+                    id: favoriteList
+                    height: parent.height
+                    width: parent.width * 0.35
+                    currentTheme: root.currentTheme
                 }
             }
 
@@ -1184,6 +1192,11 @@ FocusScope {
                 searchResultsView.currentIndex = 0
                 keyboard.resetKeyboard()
             }
+            else if (newFocus === "favorites") {
+                favoriteList.forceActiveFocus()
+                favoriteList.currentIndex = 0
+                keyboard.resetKeyboard()
+            }
         }
     }
 
@@ -1193,6 +1206,9 @@ FocusScope {
         searchResultsView.currentIndex = -1;
         if (lastPlayedList.count > 0) {
             lastPlayedList.currentIndex = 0;
+        }
+        if (favoriteList.count > 0) {
+            favoriteList.currentIndex = 0;
         }
         keyboard.currentRow = 0;
         keyboard.currentCol = 0;

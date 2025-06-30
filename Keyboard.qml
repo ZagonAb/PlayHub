@@ -12,6 +12,7 @@ FocusScope {
     property int currentCol: 0
     property var currentTheme
     property bool mouseNavigationEnabled: true
+    property real keyboardWidthScale: 0.9
 
     property var allKeys: ["A", "B", "C", "D", "E", "F",
     "G", "H", "I", "J", "K", "L",
@@ -25,22 +26,38 @@ FocusScope {
         currentCol = 0;
     }
 
-    function transferFocusToLastPlayed() {
-        if (typeof lastPlayedList !== 'undefined' && lastPlayedList.count > 0) {
-            if (lastPlayedList.currentIndex < 0) {
-                lastPlayedList.currentIndex = 0
-            }
-            lastPlayedList.forceActiveFocus()
-            if (typeof soundEffects !== 'undefined') soundEffects.play("navi")
-        }
-    }
-
     function transferFocusToSearchResults() {
         if (typeof searchResultsView !== 'undefined' && searchResultsView.count > 0) {
             if (searchResultsView.currentIndex < 0) {
                 searchResultsView.currentIndex = 0
             }
             searchResultsView.forceActiveFocus()
+            if (typeof soundEffects !== 'undefined') soundEffects.play("navi")
+        }
+    }
+
+    function transferFocusToLastPlayed() {
+        if (typeof lastPlayedList !== 'undefined' && lastPlayedList.count > 0) {
+            if (lastPlayedList.currentIndex < 0) {
+                lastPlayedList.currentIndex = 0
+            }
+            lastPlayedList.forceActiveFocus()
+            if (typeof lastPlayedList.refreshCurrentItem === 'function') {
+                Qt.callLater(lastPlayedList.refreshCurrentItem)
+            }
+            if (typeof soundEffects !== 'undefined') soundEffects.play("navi")
+        }
+    }
+
+    function transferFocusToFavorites() {
+        if (typeof favoriteList !== 'undefined' && favoriteList.count > 0) {
+            if (favoriteList.currentIndex < 0) {
+                favoriteList.currentIndex = 0
+            }
+            favoriteList.forceActiveFocus()
+            if (typeof favoriteList.refreshCurrentItem === 'function') {
+                Qt.callLater(favoriteList.refreshCurrentItem)
+            }
             if (typeof soundEffects !== 'undefined') soundEffects.play("navi")
         }
     }
@@ -87,6 +104,9 @@ FocusScope {
                 var maxCol = (currentRow === 6) ? 2 : 5
                 if (currentCol < maxCol) {
                     currentCol++
+                } else if (currentCol === 5 && currentRow < 6) {
+                    transferFocusToFavorites()
+                    return
                 } else if (currentRow < 5) {
                     currentRow++
                     currentCol = 0
@@ -154,17 +174,13 @@ FocusScope {
         }
     }
 
-
-    Rectangle {
+    Item {
         anchors.fill: parent
-        radius: 10
-        border.color: currentTheme.border
-        color: currentTheme.primary
-        border.width: 2
+        anchors.margins: keyboard.width * 0.02
 
         Column {
             anchors.fill: parent
-            anchors.margins: keyboard.width * 0.02
+            spacing: 10
 
             Item {
                 width: parent.width
@@ -172,61 +188,48 @@ FocusScope {
                 Grid {
                     id: keyGrid
                     anchors.centerIn: parent
-                    width: parent.width * 0.95
+                    width: parent.width * keyboardWidthScale
                     height: parent.height * 0.9
                     columns: 6
-                    spacing: Math.max(4, parent.width * 0.008)
+                    spacing: Math.max(4, width * 0.01)
+                    property real keyWidth: (width - (columns - 1) * spacing) / columns
+                    property real keyHeight: (height - 5 * spacing) / 6
 
                     Repeater {
                         model: keyboard.allKeys
-
                         delegate: Rectangle {
-                            width: (keyGrid.width - (keyGrid.columns - 1) * keyGrid.spacing) / keyGrid.columns
-                            height: (keyGrid.height - 5 * keyGrid.spacing) / 6
-
-                            color: {
-                                var row = Math.floor(index / 6)
-                                var col = index % 6
-                                var isSelected = (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6)
-                                return (isSelected && keyboard.activeFocus) ? "#4d99e6" : currentTheme.secondary
-                            }
-                            radius: Math.max(4, width * 0.08)
-                            border.color: currentTheme.border
-                            border.width: 1
-
+                            width: keyGrid.keyWidth
+                            height: keyGrid.keyHeight
+                            color: "transparent"
                             Rectangle {
                                 anchors.fill: parent
-                                radius: parent.radius
-                                color: "transparent"
-                                border.color: {
-                                    var row = Math.floor(index / 6)
-                                    var col = index % 6
-                                    var isSelected = (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6)
-                                    return (isSelected && keyboard.focus) ? "#55aaff" : "transparent"
-                                }
-                                border.width: 2
-                            }
-
-                            Text {
-                                text: modelData
-                                anchors.centerIn: parent
-                                font.pixelSize: Math.max(12, parent.height * 0.25)
-                                font.bold: {
-                                    var row = Math.floor(index / 6)
-                                    var col = index % 6
-                                    return (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6 && keyboard.focus)
-                                }
-
+                                radius: Math.max(4, width * 0.08)
                                 color: {
                                     var row = Math.floor(index / 6)
                                     var col = index % 6
                                     var isSelected = (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6)
-                                    return (isSelected && keyboard.focus) ? "white" : currentTheme.text
+                                    return (isSelected && keyboard.activeFocus) ? "#4d99e6" : Qt.rgba(0, 0, 0, 0.2)
                                 }
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
+                                Behavior on color {
+                                    ColorAnimation { duration: 150 }
+                                }
+                                Text {
+                                    text: modelData
+                                    anchors.centerIn: parent
+                                    font.pixelSize: Math.max(20, Math.min(parent.width, parent.height) * 0.35)
+                                    font.bold: {
+                                        var row = Math.floor(index / 6)
+                                        var col = index % 6
+                                        return (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6 && keyboard.activeFocus)
+                                    }
+                                    color: {
+                                        var row = Math.floor(index / 6)
+                                        var col = index % 6
+                                        var isSelected = (keyboard.currentRow === row && keyboard.currentCol === col && keyboard.currentRow < 6 && keyboard.activeFocus)
+                                        return isSelected ? "black" : "white"
+                                    }
+                                }
                             }
-
                             MouseArea {
                                 anchors.fill: parent
                                 onClicked: {
@@ -246,43 +249,32 @@ FocusScope {
 
             Item {
                 width: parent.width
-                height: parent.height * 0.02
-            }
-
-            Item {
-                width: parent.width
                 height: parent.height * 0.2
 
                 Row {
                     id: specialButtonsRow
                     anchors.centerIn: parent
-                    spacing: Math.max(8, parent.width * 0.02)
-
-                    property real buttonWidth: (parent.width * 0.8 - spacing * 2) / 3
-                    property real buttonHeight: parent.height * 0.7
+                    spacing: 10
+                    property real buttonWidth: keyGrid.keyWidth
+                    property real buttonHeight: keyGrid.keyHeight
 
                     Rectangle {
                         width: specialButtonsRow.buttonWidth
                         height: specialButtonsRow.buttonHeight
-                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.activeFocus) ? "#4d99e6" : currentTheme.secondary
-                        radius: Math.max(4, width * 0.05)
-                        border.color: "#666666"
-                        border.width: 1
+                        radius: Math.max(4, width * 0.08)
+                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.activeFocus) ? "#4d99e6" : Qt.rgba(0, 0, 0, 0.2)
 
                         Text {
                             text: "SPACE"
                             anchors.centerIn: parent
-                            font.pixelSize: Math.max(10, parent.height * 0.25)
-                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.focus)
-                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.focus) ? "white" : currentTheme.text
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: Math.max(15, Math.min(parent.width, parent.height) * 0.32)
+                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.activeFocus)
+                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 0 && keyboard.activeFocus) ? "black" : "white"
                         }
 
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 keyboard.currentRow = 6
                                 keyboard.currentCol = 0
@@ -290,37 +282,26 @@ FocusScope {
                                 keyboard.onKeySelected(" ")
                                 if (typeof soundEffects !== 'undefined') soundEffects.play("go")
                             }
-                            onEntered: {
-                                if (keyboard.mouseNavigationEnabled) {
-                                    keyboard.currentRow = 6
-                                    keyboard.currentCol = 0
-                                }
-                            }
                         }
                     }
 
                     Rectangle {
                         width: specialButtonsRow.buttonWidth
                         height: specialButtonsRow.buttonHeight
-                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.activeFocus) ? "#4d99e6" : currentTheme.secondary
-                        radius: Math.max(4, width * 0.05)
-                        border.color: "#666666"
-                        border.width: 1
+                        radius: Math.max(4, width * 0.08)
+                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.activeFocus) ? "#4d99e6" : Qt.rgba(0, 0, 0, 0.2)
 
                         Text {
                             text: "CLEAR"
                             anchors.centerIn: parent
-                            font.pixelSize: Math.max(10, parent.height * 0.25)
-                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.focus)
-                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.focus) ? "white" : currentTheme.text
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: Math.max(15, Math.min(parent.width, parent.height) * 0.32)
+                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.activeFocus)
+                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 1 && keyboard.activeFocus) ? "black" : "white"
                         }
 
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 keyboard.currentRow = 6
                                 keyboard.currentCol = 1
@@ -328,37 +309,26 @@ FocusScope {
                                 keyboard.onKeySelected("")
                                 if (typeof soundEffects !== 'undefined') soundEffects.play("go")
                             }
-                            onEntered: {
-                                if (keyboard.mouseNavigationEnabled) {
-                                    keyboard.currentRow = 6
-                                    keyboard.currentCol = 1
-                                }
-                            }
                         }
                     }
 
                     Rectangle {
                         width: specialButtonsRow.buttonWidth
                         height: specialButtonsRow.buttonHeight
-                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.activeFocus) ? "#4d99e6" : currentTheme.secondary
-                        radius: Math.max(4, width * 0.05)
-                        border.color: "#666666"
-                        border.width: 1
+                        radius: Math.max(4, width * 0.08)
+                        color: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.activeFocus) ? "#4d99e6" : Qt.rgba(0, 0, 0, 0.2)
 
                         Text {
                             text: "DEL"
                             anchors.centerIn: parent
-                            font.pixelSize: Math.max(10, parent.height * 0.25)
-                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.focus)
-                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.focus) ? "white" : currentTheme.text
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                            font.pixelSize: Math.max(15, Math.min(parent.width, parent.height) * 0.32)
+                            font.bold: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.activeFocus)
+                            color: (keyboard.currentRow === 6 && keyboard.currentCol === 2 && keyboard.activeFocus) ? "black" : "white"
                         }
 
                         MouseArea {
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 keyboard.currentRow = 6
                                 keyboard.currentCol = 2
@@ -367,12 +337,6 @@ FocusScope {
                                     searchBar.text = searchBar.text.substring(0, searchBar.text.length - 1)
                                 }
                                 if (typeof soundEffects !== 'undefined') soundEffects.play("go")
-                            }
-                            onEntered: {
-                                if (keyboard.mouseNavigationEnabled) {
-                                    keyboard.currentRow = 6
-                                    keyboard.currentCol = 2
-                                }
                             }
                         }
                     }

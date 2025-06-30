@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import SortFilterProxyModel 0.2
+import QtGraphicalEffects 1.12
 
 ListView {
     id: searchResultsView
@@ -135,25 +136,51 @@ ListView {
                     color: "transparent"
                     border.color: isCurrentItem ? "#4d99e6" : currentTheme.border
                     border.width: isCurrentItem ? 2 : 0
-                    radius: 5
+                    radius: 15
 
-                    Image {
-                        anchors.fill: parent
-                        anchors.margins: 5
-                        source: model.assets.screenshot || "assets/nofound.png"
-                        fillMode: Image.Stretch
-                        mipmap: true
-                        asynchronous : true
-                        cache: true
-                    }
+                    Item {
+                        width: parent.width
+                        height: parent.height
 
-                    Text {
-                        visible: model.assets.screenshot === "" || !model.assets.screenshot
-                        text: "NO IMAGE"
-                        anchors.centerIn: parent
-                        font.pixelSize: 16
-                        font.bold: true
-                        color: "#666666"
+                        Image {
+                            id: screenImage
+                            anchors.fill: parent
+                            anchors.margins: 5
+                            source: model.assets.screenshot || "assets/nofound.png"
+                            fillMode: Image.Stretch
+                            mipmap: true
+                            asynchronous : true
+                            cache: true
+                            visible: false
+                        }
+
+                        Rectangle {
+                            id: roundedMask
+                            width: screenImage.width
+                            height: screenImage.height
+                            anchors.centerIn: parent
+                            radius: 15
+                            visible: false
+                        }
+
+                        Text {
+                            visible: model.assets.screenshot === "" || !model.assets.screenshot
+                            text: "NO IMAGE"
+                            anchors.centerIn: parent
+                            font.pixelSize: 16
+                            font.bold: true
+                            color: "#666666"
+                        }
+
+                        OpacityMask {
+                            id: maskedImage
+                            width: screenImage.width
+                            height: screenImage.height
+                            anchors.centerIn: parent
+                            source: screenImage
+                            maskSource: roundedMask
+                            visible: screenImage.status === Image.Ready
+                        }
                     }
                 }
 
@@ -171,8 +198,6 @@ ListView {
                         elide: Text.ElideRight
                         color: isCurrentItem ? "#ffffff" : "#cccccc"
                         maximumLineCount: 1
-
-                        // Transición suave del color del texto
                         Behavior on color {
                             ColorAnimation {
                                 duration: 60
@@ -194,8 +219,6 @@ ListView {
                         elide: Text.ElideRight
                         color: isCurrentItem ? "#dddddd" : "#aaaaaa"
                         maximumLineCount: 1
-
-                        // Transición suave del color del subtítulo
                         Behavior on color {
                             ColorAnimation {
                                 duration: 60

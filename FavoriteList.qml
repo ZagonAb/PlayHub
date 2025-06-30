@@ -2,7 +2,7 @@ import QtQuick 2.15
 import SortFilterProxyModel 0.2
 
 ListView {
-    id: lastPlayedList
+    id: favoriteList
     width: parent.width
     height: parent.height
     clip: true
@@ -17,23 +17,25 @@ ListView {
         sourceModel: api.allGames
         filters: ExpressionFilter {
             expression: {
-                return model.lastPlayed !== undefined && model.lastPlayed !== null
+                return model.favorite === true
             }
         }
         sorters: RoleSorter {
-            roleName: "lastPlayed"
-            sortOrder: Qt.DescendingOrder
+            roleName: "title"
+            sortOrder: Qt.AscendingOrder
         }
     }
 
     delegate: Rectangle {
-        width: lastPlayedList.width
-        height: lastPlayedList.height / 3
+        width: favoriteList.width
+        height: favoriteList.height / 3
         color: "transparent"
         radius: 8
         border.color: "transparent"
         border.width: 0
-        opacity: (ListView.isCurrentItem && lastPlayedList.focus) ? 1.0 : 0.3
+
+        opacity: (ListView.isCurrentItem && favoriteList.focus) ? 1.0 : 0.3
+
         Behavior on opacity {
             NumberAnimation { duration: 150 }
         }
@@ -60,7 +62,7 @@ ListView {
 
                 Text {
                     visible: !parent.children[0].source
-                    text: "LISTVIEW"
+                    text: "FAVORITE"
                     anchors.centerIn: parent
                     font.pixelSize: 8
                     font.bold: true
@@ -75,7 +77,7 @@ ListView {
                 spacing: 4
 
                 Text {
-                    text: model.title || "LISTVIEW"
+                    text: model.title || "FAVORITE"
                     width: parent.width
                     font.pixelSize: 18
                     font.bold: true
@@ -89,7 +91,7 @@ ListView {
                         if (model.collections && model.collections.count > 0) {
                             return model.collections.get(0).name
                         }
-                        return "LISTVIEW"
+                        return "FAVORITE"
                     }
                     width: parent.width
                     font.pixelSize: 14
@@ -99,7 +101,7 @@ ListView {
                 }
 
                 Text {
-                    text: model.lastPlayed ? Qt.formatDateTime(model.lastPlayed, "dd/MM/yyyy") : ""
+                    text: model.lastPlayed ? "Last played: " + Qt.formatDateTime(model.lastPlayed, "dd/MM/yyyy") : ""
                     width: parent.width
                     font.pixelSize: 12
                     color: "#666666"
@@ -109,7 +111,7 @@ ListView {
         }
 
         Rectangle {
-            visible: ListView.isCurrentItem && lastPlayedList.focus
+            visible: ListView.isCurrentItem && favoriteList.focus
             width: 6
             height: parent.height - 20
             color: "#4d99e6"
@@ -125,8 +127,8 @@ ListView {
             anchors.fill: parent
             onClicked: {
                 if (mouseNavigationEnabled) {
-                    lastPlayedList.currentIndex = index
-                    lastPlayedList.forceActiveFocus()
+                    favoriteList.currentIndex = index
+                    favoriteList.forceActiveFocus()
                     if (typeof keyboard !== 'undefined') {
                         keyboard.resetKeyboard()
                     }
@@ -137,15 +139,15 @@ ListView {
     }
 
     header: Rectangle {
-        width: lastPlayedList.width
+        width: favoriteList.width
         height: 35
         color: currentTheme.secondary
         radius: 8
 
         Text {
-            text: "Play History"
+            text: "Favorites"
             anchors.centerIn: parent
-            font.pixelSize:16
+            font.pixelSize: 16
             font.bold: true
             color: "#4d99e6"
         }
@@ -156,7 +158,6 @@ ListView {
             if (currentIndex < 0) {
                 currentIndex = 0
             }
-
             var tempIndex = currentIndex
             currentIndex = -1
             currentIndex = tempIndex
@@ -193,7 +194,7 @@ ListView {
                 }
                 event.accepted = true
             }
-            else if (event.key === Qt.Key_Right) {
+            else if (event.key === Qt.Key_Left) {
                 keyboard.forceActiveFocus()
                 if (typeof soundEffects !== 'undefined') soundEffects.play("navi")
                     event.accepted = true
