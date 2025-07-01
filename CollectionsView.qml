@@ -41,10 +41,16 @@ ListView {
     delegate: Item {
         id: collectionlistview
 
+        property real imageScale: collectionListView.activeFocus && index === collectionListView.currentIndex ? 1.0 : 0.8
+
+        Behavior on imageScale {
+            NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+        }
+
         width: {
             if (!root || !collectionListView) return 100;
 
-            if (index === collectionListView.currentIndex && collectionListView.focus) {
+            if (index === collectionListView.currentIndex) {
                 return root.width * 0.150;
             } else if (Math.abs(index - collectionListView.currentIndex) === 1) {
                 return root.width * 0.075;
@@ -58,7 +64,6 @@ ListView {
         Behavior on width {
             NumberAnimation { duration: 300; easing.type: Easing.OutQuad }
         }
-
 
         Rectangle {
             id: bg
@@ -102,12 +107,15 @@ ListView {
                 asynchronous: true
                 visible: status === Image.Ready
                 mipmap: true
+                scale: collectionlistview.imageScale
+                transformOrigin: Item.Center
+
                 layer.enabled: true
                 layer.effect: Glow {
                     samples: 16
                     color: Qt.rgba(currentTheme.background.r, currentTheme.background.g, currentTheme.background.b,
-                                    index === collectionListView.currentIndex && collectionListView.focus ? 0.3 : 0)
-                    radius: index === collectionListView.currentIndex && collectionListView.focus ? 10 : 0
+                                   index === collectionListView.currentIndex ? 0.3 : 0)
+                    radius: index === collectionListView.currentIndex ? 10 : 0
                     spread: 0.4
                 }
             }
@@ -116,11 +124,12 @@ ListView {
                 id: collectionname
                 anchors.centerIn: parent
                 text: model.shortName.toUpperCase()
-                color: index === collectionListView.currentIndex && collectionListView.focus ?
-                currentTheme.textSelected : currentTheme.text
+                color: index === collectionListView.currentIndex ? currentTheme.textSelected : currentTheme.text
                 font.bold: true
                 font.pixelSize: parent.height * 0.1
                 visible: collectionLogo.status !== Image.Ready
+                scale: collectionlistview.imageScale
+                transformOrigin: Item.Center
             }
         }
 
