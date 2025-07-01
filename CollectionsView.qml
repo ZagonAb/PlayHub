@@ -93,7 +93,6 @@ ListView {
             }
         }
 
-
         Item {
             anchors.centerIn: parent
             width: parent.width * 0.9
@@ -134,7 +133,8 @@ ListView {
         }
 
         Rectangle {
-            width: parent.width * 0.6
+            id: indicator
+            width: parent.width * 0.8 * animScale
             height: 3
             anchors {
                 horizontalCenter: parent.horizontalCenter
@@ -144,6 +144,23 @@ ListView {
             color: currentTheme.text
             radius: 2
             visible: index === collectionListView.currentIndex && collectionListView.focus
+            property real animScale: 0
+
+            Behavior on animScale {
+                NumberAnimation {
+                    duration: 500
+                    easing.type: Easing.OutQuad
+                }
+            }
+
+            onVisibleChanged: {
+                if (visible) {
+                    animScale = 0
+                    animScale = 1
+                } else {
+                    animScale = 0
+                }
+            }
 
             property real animProgress: 0
             SequentialAnimation on animProgress {
@@ -236,3 +253,4 @@ ListView {
         }
     }
 }
+
