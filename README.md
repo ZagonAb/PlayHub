@@ -2,6 +2,8 @@
 
 - A simple and minimalist interface for pegasus frontend.
 
+> ⚠️ The theme will be subject to future updates with the intention of improving the user experience.
+
 # Screenshots
 
 ![screen0](https://github.com/ZagonAb/PlayHub/blob/34375e8357346bde2eea17b49d1c1ff00e7baa51/.meta/screenshots/screen.png)
