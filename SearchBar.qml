@@ -8,7 +8,7 @@ Rectangle {
     property alias text: searchInput.text
     property alias clearText: searchInput.text
     color: currentTheme.primary
-    border.color: focus ? "#4d99e6" : currentTheme.border
+    border.color: focus ? "#4d99e6" : currentTheme.bordercolor
     radius: 15
     border.width: 3
 

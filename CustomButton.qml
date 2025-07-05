@@ -102,7 +102,6 @@ Item {
         ScriptAction {
             script: {
                 buttonText.text = buttonRoot.dynamicText;
-                // Use timer to ensure proper calculation
                 widthUpdateTimer.start();
             }
         }

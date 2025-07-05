@@ -4,22 +4,37 @@ import SortFilterProxyModel 0.2
 Item {
     id: collectionsItem
     property alias favoritesModel: favoritesProxyModel
+    property bool favoritesLoaded: false
+    property bool modelReady: false
 
     ListModel {
         id: collectionsModel
         property int favoritesIndex: -1
         property int historyIndex: -1
+
         Component.onCompleted: {
-            var favoritecollection = { name: "Favorite", shortName: "favorite", games: favoritesProxyModel };
+            var favoritecollection = {
+                name: "Favorite",
+                shortName: "favorite",
+                games: favoritesProxyModel
+            };
             collectionsModel.append(favoritecollection);
             collectionsModel.favoritesIndex = collectionsModel.count - 1;
-            var historycollection = { name: "History", shortName: "history", games: history };
+
+            var historycollection = {
+                name: "History",
+                shortName: "history",
+                games: history
+            };
             collectionsModel.append(historycollection);
             collectionsModel.historyIndex = collectionsModel.count - 1;
+
             for (var i = 0; i < api.collections.count; ++i) {
                 var collection = api.collections.get(i);
                 collectionsModel.append(collection);
             }
+
+            modelReady = true;
         }
     }
 
@@ -27,6 +42,12 @@ Item {
         id: favoritesProxyModel
         sourceModel: api.allGames
         filters: ValueFilter { roleName: "favorite"; value: true }
+
+        onCountChanged: {
+            if (count > 0) {
+                collectionsItem.favoritesLoaded = true;
+            }
+        }
     }
 
     SortFilterProxyModel {

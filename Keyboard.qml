@@ -6,7 +6,6 @@ FocusScope {
     height: parent.height
 
     property var onKeySelected: function(key) {}
-    property var onCloseRequested: function() {}
     signal closeRequested()
     property int currentRow: 0
     property int currentCol: 0
@@ -24,6 +23,11 @@ FocusScope {
     function resetKeyboard() {
         currentRow = 0;
         currentCol = 0;
+    }
+
+    onCloseRequested: {
+        root.searchVisible = false;
+        if (typeof soundEffects !== 'undefined') soundEffects.play("back");
     }
 
     function transferFocusToSearchResults() {

@@ -10,12 +10,12 @@ Item {
     height: parent.height
     visible: x < parent.width
     opacity: root.isGameInfoOpen ? 1 : 0
-    property var currentGame: root.game
     property bool gameInfoFocused: false
     property bool isGameInfoOpen: false
     property int lastFocusedIndex: 0
     property var currentTheme: root.currentTheme
     property string currentThemeName: root.currentThemeName
+    property var currentGame: root.game ? root.game : null
 
     onVisibleChanged: {
         if (visible) {
@@ -47,6 +47,8 @@ Item {
     onCurrentGameChanged: {
         if (currentGame) {
             favoriteButton.updateFavoriteState();
+        } else if (gameGridView.model && gameGridView.model.count > 0) {
+            currentGame = gameGridView.model.get(gameGridView.currentIndex);
         }
     }
 
@@ -246,7 +248,7 @@ Item {
                                 iconSource: "assets/icons/play.svg"
                                 backgroundColor: currentTheme.primary
                                 textColor: currentTheme.buttomText
-                                borderColor: currentTheme.border
+                                borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 0
                                 showFocusRing: true
@@ -269,7 +271,7 @@ Item {
                                 iconSource: isFavorite ? "assets/icons/heart-filled.svg" : "assets/icons/heart-outline.svg"
                                 backgroundColor: currentTheme.primary
                                 textColor: currentTheme.buttomText
-                                borderColor: currentTheme.border
+                                borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 1
                                 showFocusRing: true
@@ -358,7 +360,7 @@ Item {
                                 iconSource: "assets/icons/play.svg"
                                 backgroundColor: currentTheme.primary
                                 textColor: currentTheme.buttomText
-                                borderColor: currentTheme.border
+                                borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 2
                                 showFocusRing: true

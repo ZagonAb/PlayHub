@@ -3,7 +3,6 @@ import SortFilterProxyModel 0.2
 
 Item {
     id: gamesGridModel
-
     property var currentTheme
     property var rootItem: null
 

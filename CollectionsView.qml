@@ -15,9 +15,20 @@ ListView {
     property string currentShortName: ""
     property string currentCollectionName: ""
     property int indexToPosition: -1
+    property bool modelInitialized: false
+    property var currentCollection: model && currentIndex >= 0 ? model.get(currentIndex) : null
 
     ColorMapping {
         id: colorMapping
+    }
+
+    onModelChanged: {
+        if (model && model.count > 0) {
+            modelInitialized = true;
+            if (collectionsModel.favoritesIndex >= 0) {
+                collectionsModel.favoritesModel.invalidate();
+            }
+        }
     }
 
     Item {
@@ -197,11 +208,36 @@ ListView {
     }
 
     onCurrentIndexChanged: {
-        const selectedCollection = model.get(currentIndex)
-        gameGridView.model = model.get(currentIndex).games;
-        currentShortName = selectedCollection.shortName
-        currentCollectionName = selectedCollection.name
-        indexToPosition = currentIndex
+        if (!model || currentIndex < 0) return;
+
+        currentCollection = model.get(currentIndex);
+        if (!currentCollection) return;
+
+        if (currentCollection.shortName === "favorite") {
+            if (!collectionsModel.favoritesLoaded) {
+                gameGridView.model = null;
+                Qt.callLater(function() {
+                    collectionsModel.favoritesModel.invalidate();
+                    gameGridView.model = currentCollection.games;
+                    if (gameGridView.model && gameGridView.model.count > 0) {
+                        gameGridView.currentIndex = 0;
+                        root.game = gameGridView.model.get(0);
+                    }
+                });
+            } else {
+                gameGridView.model = currentCollection.games;
+            }
+        } else {
+            gameGridView.model = currentCollection.games;
+        }
+
+        currentShortName = currentCollection.shortName;
+        currentCollectionName = currentCollection.name;
+        indexToPosition = currentIndex;
+        if (gameGridView.model && gameGridView.model.count > 0) {
+            gameGridView.currentIndex = 0;
+            root.game = gameGridView.model.get(0);
+        }
     }
 
     Keys.onLeftPressed: {
@@ -253,4 +289,3 @@ ListView {
         }
     }
 }
-

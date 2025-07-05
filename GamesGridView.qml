@@ -22,12 +22,18 @@ GridView {
         if (model && model.count > 0) {
             currentIndex = 0;
             if (rootItem) {
-                rootItem.game = model.get(0);
+                rootItem.game = model.get(currentIndex);
+                if (rootItem.bottomBar) {
+                    rootItem.bottomBar.selectedGame = model.get(currentIndex);
+                }
             }
         } else {
             currentIndex = -1;
             if (rootItem) {
                 rootItem.game = null;
+                if (rootItem.bottomBar) {
+                    rootItem.bottomBar.selectedGame = null;
+                }
             }
         }
     }
@@ -516,11 +522,11 @@ GridView {
                         }
                     }
                 }
-            else if (api.keys.isFilters(event)) {
-                event.accepted = true;
-                root.searchVisible = true;
-                soundEffects.play("go");
-            }
+                else if (api.keys.isFilters(event)) {
+                    event.accepted = true;
+                    root.searchVisible = true;
+                    soundEffects.play("go");
+                }
         }
 
         if (api.keys.isNextPage(event)) {

@@ -11,15 +11,17 @@ Item {
     property var settingsImage
     property string currentFocus: "collections"
     property var focusHistory: []
+    property bool restoringPosition: false
 
     function logFocus(message) {
         //console.log("[FocusManager]", message, "- Current focus:", currentFocus);
     }
 
     function setFocus(target, fromComponent) {
-        if (fromComponent) {
+        if (fromComponent === "restore") {
+            restoringPosition = true;
+        } else if (fromComponent) {
             focusHistory.push(currentFocus);
-            // logFocus("Focus change requested from " + fromComponent);
         }
 
         switch(target) {
@@ -82,23 +84,26 @@ Item {
             break;
         }
 
+        if (fromComponent === "restore") {
+            restoringPosition = false;
+        }
+
         //logFocus("Focus changed to " + target);
     }
 
     function returnFocus() {
-        if (focusHistory.length > 0) {
+        if (focusHistory.length > 0 && !restoringPosition) {
             var previousFocus = focusHistory.pop();
             setFocus(previousFocus);
-            //logFocus("Returned to previous focus: " + previousFocus);
-        } else {
+        } else if (!restoringPosition) {
             setFocus("collections");
-            //logFocus("No focus history, defaulting to collections");
         }
     }
 
     function resetFocus() {
-        focusHistory = [];
-        setFocus("collections");
-        //logFocus("Focus reset to initial state");
+        if (!restoringPosition) {
+            focusHistory = [];
+            setFocus("collections");
+        }
     }
 }

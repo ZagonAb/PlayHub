@@ -95,7 +95,7 @@ Item {
                         height: gameDetails.height * 0.07
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -148,7 +148,7 @@ Item {
                         height: gameDetails.height * 0.07
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -181,7 +181,7 @@ Item {
                         height: gameDetails.height * 0.07
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -313,7 +313,7 @@ Item {
                         Layout.preferredHeight: gameDetails.height * 0.09
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -348,7 +348,7 @@ Item {
                         Layout.preferredHeight: gameDetails.height * 0.09
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -383,7 +383,7 @@ Item {
                         Layout.preferredHeight: gameDetails.height * 0.08
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -402,7 +402,6 @@ Item {
                             }
 
                             Text {
-                                //text: calculateLastPlayedText()
                                 text: Utils.calculateLastPlayedText(game && game.lastPlayed)
                                 color: currentTheme.text
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
@@ -417,7 +416,7 @@ Item {
                         Layout.preferredHeight: gameDetails.height * 0.08
                         color: currentTheme.background
                         opacity: 1.0
-                        border.color: currentTheme.border
+                        border.color: currentTheme.bordercolor
                         border.width: 1
                         radius: 5
 
@@ -436,7 +435,6 @@ Item {
                             }
 
                             Text {
-                                //text: calculatePlayTimeText(false)
                                 text: Utils.calculatePlayTimeText(game && game.playTime, false)
                                 color: currentTheme.text
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
@@ -452,7 +450,7 @@ Item {
                     Layout.preferredHeight: gameDetails.height * 0.08
                     color: currentTheme.background
                     opacity: 1.0
-                    border.color: currentTheme.border
+                    border.color: currentTheme.bordercolor
                     border.width: 1
                     radius: 5
 
@@ -471,7 +469,6 @@ Item {
                         }
 
                         Text {
-                            //text: getNameCollecForGame(game)
                             text: Utils.getNameCollecForGame(game, api)
                             color: currentTheme.text
                             font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)

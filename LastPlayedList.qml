@@ -175,8 +175,8 @@ ListView {
                 soundEffects.play("launch");
                 if (model && currentIndex >= 0) {
                     var game = model.get(currentIndex);
-                    searchOverlay.parent.game = game;
-                    searchOverlay.parent.launchTimer.start();
+                    searchOverlayLoader.parent.game = game;
+                    searchOverlayLoader.parent.launchTimer.start();
                 }
             }
             else if (event.key === Qt.Key_Up) {

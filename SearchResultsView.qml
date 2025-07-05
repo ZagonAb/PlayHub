@@ -14,11 +14,11 @@ ListView {
     property string filter: ""
     property int visibleItemCount: 3
     property var root: parent
-    property var currentTheme
     property bool showRandomGames: filter === ""
     property var randomGameIndices: []
     property bool useRandomModel: filter === ""
     property bool mouseNavigationEnabled: true
+    property var currentTheme: parent.currentTheme || root.currentTheme
 
     snapMode: ListView.NoSnap
     highlightFollowsCurrentItem: true
@@ -134,7 +134,7 @@ ListView {
                     width: parent.width
                     height: parent.height - 60
                     color: "transparent"
-                    border.color: isCurrentItem ? "#4d99e6" : currentTheme.border
+                    border.color: isCurrentItem ? "#4d99e6" : (currentTheme ? currentTheme.bordercolor : "#c0c0c0")
                     border.width: isCurrentItem ? 2 : 0
                     radius: 15
 
@@ -268,8 +268,8 @@ ListView {
                 soundEffects.play("launch");
                 if (model && currentIndex >= 0) {
                     var game = model.get(currentIndex);
-                    searchOverlay.parent.game = game;
-                    searchOverlay.parent.launchTimer.start();
+                    searchOverlayLoader.parent.game = game;
+                    searchOverlayLoader.parent.launchTimer.start();
                 }
             }
             else if (api.keys.isCancel(event)) {

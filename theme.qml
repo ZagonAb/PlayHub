@@ -24,8 +24,20 @@ FocusScope {
     property bool isGameInfoOpen: false
     property alias launchTimer: launchTimer
     property bool focusEnabled: false
-    property bool searchVisible: false
+    property bool positionRestored: false
 
+    property bool searchVisible: false
+    onSearchVisibleChanged: {
+        if (searchVisible) {
+            searchOverlayLoader.active = true
+        } else {
+            if (searchOverlayLoader.item) {
+                var lastFocused = searchOverlayLoader.item.lastFocusedItem
+                focusManager.setFocus(lastFocused || "collections", "search")
+            }
+            searchOverlayLoader.active = false
+        }
+    }
 
     Connections {
         target: gameInfo
@@ -295,6 +307,11 @@ FocusScope {
             easing.type: Easing.InOutQuad
             onStopped: {
                 mainContainer.destroy()
+                if (positionRestored) {
+                    Qt.callLater(function() {
+                        focusManager.setFocus("games", "restore");
+                    });
+                }
             }
         }
     }
@@ -345,8 +362,17 @@ FocusScope {
         repeat: false
         running: true
         onTriggered: {
-            root.focusEnabled = true
-            collectionListView.focus = true
+            if (!positionRestored) {
+                focusEnabled = true;
+                collectionListView.focus = true;
+            }
+        }
+    }
+
+    function clearMemoryIfNotRestoring() {
+        if (!focusManager.restoringPosition) {
+            api.memory.unset('lastCollectionIndex');
+            api.memory.unset('lastGameTitle');
         }
     }
 
@@ -358,7 +384,7 @@ FocusScope {
             text: "#333333",
             textSelected: "#000000",
             buttomText: "#333333",
-            border: "#c0c0c0",
+            bordercolor: "#c0c0c0",
             gridviewborder: "#424242",
             settingsText: "#333333",
             iconColor: "#555555",
@@ -372,7 +398,7 @@ FocusScope {
             text: "#a8a8a6",
             textSelected: "white",
             buttomText: "white",
-            border: "#a8a8a6",
+            bordercolor: "#a8a8a6",
             gridviewborder: "#b1b1b1",
             settingsText: "#a8a8a6",
             iconColor: "#a8a8a6",
@@ -412,6 +438,8 @@ FocusScope {
         repeat: false
         onTriggered: {
             if (root.game) {
+                api.memory.set('lastCollectionIndex', collectionListView.currentIndex);
+                api.memory.set('lastGameTitle', root.game.title);
                 var collectionName = Utils.getNameCollecForGame(root.game, api);
                 for (var i = 0; i < api.collections.count; ++i) {
                     var collection = api.collections.get(i);
@@ -438,10 +466,105 @@ FocusScope {
         } else {
             applyTheme("light");
         }
+
+        focusEnabled = false;
+        var lastCollectionIndex = api.memory.get('lastCollectionIndex');
+        var lastGameTitle = api.memory.get('lastGameTitle');
+
+        if (lastCollectionIndex !== undefined && lastGameTitle !== undefined) {
+            positionRestored = true;
+            restorePosition();
+        } else {
+            positionRestored = false;
+            clearMemoryIfNotRestoring();
+
+            var checkModel = function() {
+                if (collectionListView.model && collectionListView.model.count > 0) {
+                    collectionListView.currentIndex = 0;
+                    focusManager.setFocus("collections", "restore");
+                    Qt.callLater(function() {
+                        if (collectionsModel.favoritesIndex >= 0) {
+                            collectionsModel.favoritesModel.invalidate();
+                        }
+                        Qt.callLater(function() {
+                            if (gameGridView.model && gameGridView.model.count > 0) {
+                                gameGridView.currentIndex = 0;
+                                root.game = gameGridView.model.get(0);
+                            }
+                        });
+                    });
+                } else {
+                    Qt.callLater(checkModel);
+                }
+            };
+            Qt.callLater(checkModel);
+        }
+
         soundEffects.play("navi");
         settingsIconFocused = false;
-        collectionListView.focus = true;
-        gameGridView.currentIndex = -1;
+    }
+
+    Timer {
+        id: clearMemoryTimer
+        interval: 500
+        repeat: false
+        onTriggered: {
+            clearMemoryIfNotRestoring();
+        }
+    }
+
+    function restorePosition() {
+        var lastCollectionIndex = api.memory.get('lastCollectionIndex');
+        var lastGameTitle = api.memory.get('lastGameTitle');
+
+        if (lastCollectionIndex !== undefined && lastGameTitle !== undefined) {
+            if (collectionListView.model && collectionListView.model.count > 0) {
+                setPositionByTitle(lastCollectionIndex, lastGameTitle);
+            } else {
+                var checkModel = function() {
+                    if (collectionListView.model && collectionListView.model.count > 0) {
+                        setPositionByTitle(lastCollectionIndex, lastGameTitle);
+                    } else {
+                        Qt.callLater(checkModel);
+                    }
+                };
+                Qt.callLater(checkModel);
+            }
+        }
+    }
+
+    function setPositionByTitle(collectionIndex, gameTitle) {
+        if (collectionIndex >= 0 && collectionIndex < collectionListView.model.count) {
+            collectionListView.currentIndex = collectionIndex;
+            collectionListView.positionViewAtIndex(collectionIndex, ListView.Center);
+
+            var checkGamesModel = function() {
+                if (gameGridView.model && gameGridView.model.count > 0) {
+                    var foundIndex = -1;
+                    for (var i = 0; i < gameGridView.model.count; i++) {
+                        var game = gameGridView.model.get(i);
+                        if (game.title === gameTitle) {
+                            foundIndex = i;
+                            break;
+                        }
+                    }
+
+                    var targetIndex = foundIndex >= 0 ? foundIndex : 0;
+
+                    gameGridView.currentIndex = targetIndex;
+                    gameGridView.positionViewAtIndex(targetIndex, GridView.Center);
+
+                    Qt.callLater(function() {
+                        focusEnabled = true;
+                        focusManager.setFocus("games", "restore");
+                        clearMemoryTimer.start();
+                    });
+                } else {
+                    Qt.callLater(checkGamesModel);
+                }
+            };
+            Qt.callLater(checkGamesModel);
+        }
     }
 
     CollectionsModel {
@@ -654,9 +777,15 @@ FocusScope {
             }
             currentShortName: collectionListView.currentShortName
             rootItem: root
-            model: collectionListView.model && collectionListView.currentIndex >= 0 ?
-            collectionListView.model.get(collectionListView.currentIndex).games :
-            null
+            model: {
+                if (!collectionListView.model ||
+                    collectionListView.currentIndex < 0 ||
+                    !collectionListView.model.get(collectionListView.currentIndex)) {
+                    return null;
+                    }
+                    var collection = collectionListView.model.get(collectionListView.currentIndex);
+                return collection && collection.games ? collection.games : null;
+            }
             visible: !settingsIconSelected
             Keys.enabled: root.focusEnabled
         }
@@ -1082,136 +1211,142 @@ FocusScope {
         property var soundEffects: soundEffects
     }
 
-    Rectangle {
-        id: searchOverlay
+    Loader {
+        id: searchOverlayLoader
         anchors.fill: parent
-        color: Qt.rgba(0, 0, 0, 0.95)
-        visible: searchVisible
+        active: false
         z: 1000
-        property var lastFocusedItem: null
 
-        onVisibleChanged: {
-            if (visible) {
-                searchResultsView.resetRandomGames();
-                lastFocusedItem = focusManager.currentFocus;
-                focusManager.setFocus("search", "games");
-                keyboard.forceActiveFocus();
-            } else {
-                resetSearch();
-                if (lastFocusedItem) {
-                    focusManager.setFocus(lastFocusedItem, "search");
-                }
-            }
-        }
+        sourceComponent: Component {
+            Item {
+                id: searchOverlayContainer
+                property var lastFocusedItem: null
 
-        Timer {
-            id: focusTimer2
-            interval: 100
-            onTriggered: {
-                keyboard.forceActiveFocus()
-            }
-        }
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {}
-        }
-        Column {
-            anchors.fill: parent
-            anchors.margins: 20
-            spacing: 20
-            SearchBar {
-                id: searchBar
-                width: parent.width * 0.6
-                anchors.horizontalCenter: parent.horizontalCenter
-                currentTheme: root.currentTheme
-            }
+                Rectangle {
+                    anchors.fill: parent
+                    color: Qt.rgba(0, 0, 0, 0.95)
 
-            Row {
-                width: parent.width * 0.95
-                height: parent.height * 0.4
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 20
+                    Timer {
+                        id: focusTimer2
+                        interval: 100
+                        running: true
+                        onTriggered: keyboard.forceActiveFocus()
+                    }
 
-                LastPlayedList {
-                    id: lastPlayedList
-                    height: parent.height
-                    width: parent.width * 0.35
-                    currentTheme: root.currentTheme
-                }
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {}
+                    }
 
-                Keyboard {
-                    id: keyboard
-                    height: parent.height
-                    width: parent.width * 0.30
-                    currentTheme: root.currentTheme
-                    onKeySelected: function(key) {
-                        if (key === "") {
-                            searchBar.text = ""
-                        } else {
-                            searchBar.text += key
+                    Column {
+                        anchors.fill: parent
+                        anchors.margins: 20
+                        spacing: 20
+
+                        SearchBar {
+                            id: searchBar
+                            width: parent.width * 0.6
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            currentTheme: root.currentTheme
+                        }
+
+                        Row {
+                            width: parent.width * 0.95
+                            height: parent.height * 0.4
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 20
+
+                            LastPlayedList {
+                                id: lastPlayedList
+                                height: parent.height
+                                width: parent.width * 0.35
+                                currentTheme: root.currentTheme
+                            }
+
+                            Keyboard {
+                                id: keyboard
+                                height: parent.height
+                                width: parent.width * 0.30
+                                currentTheme: root.currentTheme
+                                onKeySelected: function(key) {
+                                    if (key === "") {
+                                        searchBar.text = ""
+                                    } else {
+                                        searchBar.text += key
+                                    }
+                                }
+                                onCloseRequested: searchVisible = false
+                            }
+
+                            FavoriteList {
+                                id: favoriteList
+                                height: parent.height
+                                width: parent.width * 0.35
+                                currentTheme: root.currentTheme
+                            }
+                        }
+
+                        SearchResultsView {
+                            id: searchResultsView
+                            width: parent.width
+                            height: parent.height * 0.45
+                            property var currentTheme: root.currentTheme
                         }
                     }
-                    onCloseRequested: {
-                        searchVisible = false
+
+                    Keys.onPressed: {
+                        if (api.keys.isCancel(event)) {
+                            event.accepted = true
+                            searchVisible = false
+                            if (typeof soundEffects !== 'undefined') soundEffects.play("back")
+                        }
                     }
                 }
 
-                FavoriteList {
-                    id: favoriteList
-                    height: parent.height
-                    width: parent.width * 0.35
-                    currentTheme: root.currentTheme
+                Component.onCompleted: {
+                    searchResultsView.resetRandomGames()
+                    lastFocusedItem = focusManager.currentFocus
+                    focusManager.setFocus("search", "games")
                 }
-            }
 
-            SearchResultsView {
-                id: searchResultsView
-                width: parent.width
-                height: parent.height * 0.45
-                currentTheme: root.currentTheme
-            }
-        }
-        Keys.onPressed: {
-            if (api.keys.isCancel(event)) {
-                event.accepted = true
-                searchVisible = false
-                if (typeof soundEffects !== 'undefined') soundEffects.play("back")
-            }
-        }
-
-        function handleMouseFocusChange(newFocus) {
-            if (newFocus === "searchBar") {
-                searchBar.forceActiveFocus()
-                keyboard.forceActiveFocus()
-            } else if (newFocus === "lastPlayed") {
-                lastPlayedList.forceActiveFocus()
-                lastPlayedList.currentIndex = 0
-                keyboard.resetKeyboard()
-            } else if (newFocus === "searchResults") {
-                searchResultsView.forceActiveFocus()
-                searchResultsView.currentIndex = 0
-                keyboard.resetKeyboard()
-            }
-            else if (newFocus === "favorites") {
-                favoriteList.forceActiveFocus()
-                favoriteList.currentIndex = 0
-                keyboard.resetKeyboard()
+                function handleMouseFocusChange(newFocus) {
+                    if (newFocus === "searchBar") {
+                        searchBar.forceActiveFocus()
+                        keyboard.forceActiveFocus()
+                    } else if (newFocus === "lastPlayed") {
+                        lastPlayedList.forceActiveFocus()
+                        lastPlayedList.currentIndex = 0
+                        keyboard.resetKeyboard()
+                    } else if (newFocus === "searchResults") {
+                        searchResultsView.forceActiveFocus()
+                        searchResultsView.currentIndex = 0
+                        keyboard.resetKeyboard()
+                    }
+                    else if (newFocus === "favorites") {
+                        favoriteList.forceActiveFocus()
+                        favoriteList.currentIndex = 0
+                        keyboard.resetKeyboard()
+                    }
+                }
             }
         }
     }
 
     function resetSearch() {
-        searchBar.text = "";
-        searchResultsView.filter = "";
-        searchResultsView.currentIndex = -1;
-        if (lastPlayedList.count > 0) {
-            lastPlayedList.currentIndex = 0;
+        if (searchOverlayLoader.item) {
+            searchOverlayLoader.item.searchBar.text = ""
+            searchOverlayLoader.item.searchResultsView.filter = ""
+            searchOverlayLoader.item.searchResultsView.currentIndex = -1
+            if (searchOverlayLoader.item.lastPlayedList.count > 0) {
+                searchOverlayLoader.item.lastPlayedList.currentIndex = 0
+            }
+            if (searchOverlayLoader.item.favoriteList.count > 0) {
+                searchOverlayLoader.item.favoriteList.currentIndex = 0
+            }
+            if (typeof keyboard !== 'undefined') {
+                keyboard.resetKeyboard()
+            }
         }
-        if (favoriteList.count > 0) {
-            favoriteList.currentIndex = 0;
-        }
-        keyboard.currentRow = 0;
-        keyboard.currentCol = 0;
     }
 
     function toggleFavorite(game) {
@@ -1237,6 +1372,9 @@ FocusScope {
     }
 
     function showGameInfo() {
+        if (gameGridView.model && gameGridView.currentIndex >= 0) {
+            root.game = gameGridView.model.get(gameGridView.currentIndex);
+        }
         isGameInfoOpen = true;
         focusManager.setFocus("gameinfo", "games");
         soundEffects.play("go");
