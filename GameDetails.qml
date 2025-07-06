@@ -9,9 +9,11 @@ Item {
     width: parent.width * 0.35
     height: parent.height
     anchors.right: parent.right
-    visible: false
-    focus: visible
+    anchors.rightMargin: isAnimatedVisible ? 0 : -width
+    visible: true
+    focus: isAnimatedVisible
     property bool isClosing: false
+    property bool isAnimatedVisible: false
     property var currentTheme: root.currentTheme
     property string currentThemeName: root.currentThemeName
 
@@ -35,10 +37,21 @@ Item {
         applyTheme(root.currentThemeName);
     }
 
-    Behavior on opacity {
+    Behavior on anchors.rightMargin {
         NumberAnimation {
             duration: 300
             easing.type: Easing.OutQuad
+            onFinished: {
+                if (!isAnimatedVisible) {
+                    visible = false;
+                }
+            }
+        }
+    }
+
+    onIsAnimatedVisibleChanged: {
+        if (isAnimatedVisible) {
+            visible = true;
         }
     }
 
@@ -47,7 +60,7 @@ Item {
             if (api.keys.isCancel(event)) {
                 event.accepted = true;
                 isClosing = true;
-                visible = false;
+                isAnimatedVisible = false;
                 soundEffects.play("back");
             }
         }

@@ -505,12 +505,12 @@ Item {
                             }
 
                             function expandDescription() {
-                                if (gameDetailsPanel.visible) {
-                                    gameDetailsPanel.visible = false;
+                                if (gameDetailsPanel.isAnimatedVisible) {
+                                    gameDetailsPanel.isAnimatedVisible = false;
                                     descriptionButton.isExpanded = false;
                                     descriptionButton.displayText = descriptionButton.shortDescription;
                                 } else {
-                                    gameDetailsPanel.visible = true;
+                                    gameDetailsPanel.isAnimatedVisible = true;
                                     descriptionButton.isExpanded = false;
                                     descriptionButton.displayText = descriptionButton.shortDescription;
                                 }
@@ -564,8 +564,8 @@ Item {
                                     videoPlayer.stopVideo();
                                     soundEffects.play("back");
                                     focusManager.setFocus("gameinfo", "mediaplayer");
-                                } else if (gameDetailsPanel.visible) {
-                                    gameDetailsPanel.visible = false;
+                                } else if (gameDetailsPanel.isAnimatedVisible) {
+                                    gameDetailsPanel.isAnimatedVisible = false;
                                     soundEffects.play("back");
                                     focusManager.setFocus("gameinfo", "gamedetails");
                                 } else {
@@ -586,8 +586,8 @@ Item {
                                         soundEffects.play("back");
                                     }
                                 } else if (currentIndex === 3) {
-                                    gameDetailsPanel.visible = !gameDetailsPanel.visible;
-                                    if (gameDetailsPanel.visible) {
+                                    gameDetailsPanel.isAnimatedVisible = !gameDetailsPanel.isAnimatedVisible;
+                                    if (gameDetailsPanel.isAnimatedVisible) {
                                         descriptionButton.isSelected = false;
                                         descriptionButton.displayText = descriptionButton.shortDescription;
                                     } else {
@@ -606,7 +606,7 @@ Item {
     Rectangle {
         id: darkenEffect
         anchors.fill: parent
-        visible: gameDetailsPanel.visible
+        visible: gameDetailsPanel.isAnimatedVisible
         gradient: Gradient {
             orientation: Gradient.Horizontal
             GradientStop { position: 0.0; color: Qt.rgba(0, 0, 0, 0.9) }
@@ -616,6 +616,7 @@ Item {
             }
             GradientStop { position: 1.0; color: "transparent" }
         }
+
         opacity: 0
 
         Behavior on opacity {
@@ -633,23 +634,26 @@ Item {
         }
     }
 
+    Timer {
+        id: focusRestoreTimer
+        interval: 150
+        running: false
+        repeat: false
+        onTriggered: {
+            descriptionButton.isSelected = true;
+            navigationContainer.currentIndex = 3;
+            navigationContainer.forceActiveFocus();
+        }
+    }
+
     GameDetails {
         id: gameDetailsPanel
-        opacity: visible ? 1 : 0
+        opacity: 1
 
-        onVisibleChanged: {
-            darkenEffect.opacity = visible ? 1 : 0
-            if (!visible) {
-                descriptionButton.isSelected = true;
-                navigationContainer.currentIndex = 3;
-                navigationContainer.forceActiveFocus();
-            }
-        }
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: 300
-                easing.type: Easing.OutQuad
+        onIsAnimatedVisibleChanged: {
+            darkenEffect.opacity = isAnimatedVisible ? 1 : 0
+            if (!isAnimatedVisible) {
+                focusRestoreTimer.start();
             }
         }
     }
