@@ -41,6 +41,10 @@ GridView {
     clip: true
     keyNavigationEnabled: true
     keyNavigationWraps: true
+    cacheBuffer: cellHeight * 4
+    displayMarginBeginning: cellHeight
+    displayMarginEnd: cellHeight
+    reuseItems: true
 
     opacity: 1
     Behavior on opacity {
@@ -91,6 +95,10 @@ GridView {
                         height: parent.height * 0.93
                         anchors.centerIn: parent
                         mipmap: true
+                        cache: true
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: false
                     }
 
                     Rectangle {
@@ -152,6 +160,10 @@ GridView {
                         opacity: gameImage.status === Image.Ready ? (isSelected ? 1.0 : 0.7) : 0
                         visible: opacity > 0
                         mipmap: true
+                        cache: true
+                        sourceSize.width: width
+                        sourceSize.height: height
+                        smooth: false
                         anchors.verticalCenterOffset: isSelected && gameGridView.focus ? -3 : 0
                         scale: isSelected && gameGridView.focus ? 1.05 : 1.0
                         layer.enabled: true

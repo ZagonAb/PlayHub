@@ -209,9 +209,10 @@ ListView {
 
     onCurrentIndexChanged: {
         if (!model || currentIndex < 0) return;
-
         currentCollection = model.get(currentIndex);
         if (!currentCollection) return;
+        currentShortName = currentCollection.shortName;
+        currentCollectionName = currentCollection.name;
 
         if (currentCollection.shortName === "favorite") {
             if (!collectionsModel.favoritesLoaded) {
@@ -231,8 +232,6 @@ ListView {
             gameGridView.model = currentCollection.games;
         }
 
-        currentShortName = currentCollection.shortName;
-        currentCollectionName = currentCollection.name;
         indexToPosition = currentIndex;
         if (gameGridView.model && gameGridView.model.count > 0) {
             gameGridView.currentIndex = 0;
@@ -248,6 +247,12 @@ ListView {
         } else {
             decrementCurrentIndex();
             soundEffects.play("navi");
+            if (model && currentIndex >= 0) {
+                var collection = model.get(currentIndex);
+                if (collection) {
+                    currentShortName = collection.shortName;
+                }
+            }
         }
     }
 
@@ -259,6 +264,12 @@ ListView {
         } else {
             incrementCurrentIndex();
             soundEffects.play("navi");
+            if (model && currentIndex >= 0) {
+                var collection = model.get(currentIndex);
+                if (collection) {
+                    currentShortName = collection.shortName;
+                }
+            }
         }
     }
 

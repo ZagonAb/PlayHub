@@ -147,7 +147,7 @@ Item {
 
                                     return "Unknown";
                                 }
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -181,7 +181,7 @@ Item {
 
                             Text {
                                 text: game && game.releaseYear > 0 ? game.releaseYear.toString() : "Unknown"
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -214,7 +214,7 @@ Item {
 
                             Text {
                                 text: game && game.rating ? (game.rating * 100).toFixed(0) + "%" : "N/A"
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -229,7 +229,7 @@ Item {
                     Layout.preferredHeight: gameDetails.height * 0.5
                     color: Qt.rgba(0, 0, 0, 0.3)
                     radius: 5
-                    border.color: currentTheme.textSelected
+                    border.color: currentTheme.textgamedetails
                     border.width: 1
 
                     layer.enabled: true
@@ -295,7 +295,7 @@ Item {
                                 width: parent.width - (parent.sidePadding * 2)
                                 wrapMode: Text.Wrap
                                 font.pixelSize: Math.min(root.height * 0.022, root.width * 0.026)
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 layer.enabled: true
                                 layer.effect: DropShadow {
                                     color: currentTheme.background
@@ -346,7 +346,7 @@ Item {
 
                             Text {
                                 text: game && game.developer ? game.developer : "Unknown"
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -381,7 +381,7 @@ Item {
 
                             Text {
                                 text: game && game.publisher ? game.publisher : "Unknown"
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -416,7 +416,7 @@ Item {
 
                             Text {
                                 text: Utils.calculateLastPlayedText(game && game.lastPlayed)
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -449,7 +449,7 @@ Item {
 
                             Text {
                                 text: Utils.calculatePlayTimeText(game && game.playTime, false)
-                                color: currentTheme.text
+                                color: currentTheme.textgamedetails
                                 font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -483,7 +483,7 @@ Item {
 
                         Text {
                             text: Utils.getNameCollecForGame(game, api)
-                            color: currentTheme.text
+                            color: currentTheme.textgamedetails
                             font.pixelSize: Math.min(root.height * 0.018, root.width * 0.025)
                             horizontalAlignment: Text.AlignHCenter
                             Layout.fillWidth: true

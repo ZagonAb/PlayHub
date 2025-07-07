@@ -245,7 +245,7 @@ Item {
                                 Layout.minimumWidth: 150
                                 Layout.preferredHeight: 50
                                 text: "Launch"
-                                iconSource: "assets/icons/play.svg"
+                                iconSource: "assets/icons/launch.svg"
                                 backgroundColor: currentTheme.primary
                                 textColor: currentTheme.buttomText
                                 borderColor: currentTheme.bordercolor

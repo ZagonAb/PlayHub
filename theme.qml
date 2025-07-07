@@ -25,8 +25,31 @@ FocusScope {
     property alias launchTimer: launchTimer
     property bool focusEnabled: false
     property bool positionRestored: false
+    property real systemColorOpacity: 0.2
+    property real themeColorOpacity: 1
+    property bool gradientSystemOnTop: false
+
+    property color rawSystemColor: {
+        if (collectionListView.currentShortName) {
+            return colorMapping.colorMap[collectionListView.currentShortName.toLowerCase()] || currentTheme.background
+        }
+        return currentTheme.background
+    }
+
+    property color rawThemeColor: currentTheme.background
+
+    function colorWithOpacity(baseColor, opacity) {
+        return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, opacity);
+    }
+
+    Connections {
+        target: collectionListView
+        function onCurrentShortNameChanged() {
+        }
+    }
 
     property bool searchVisible: false
+
     onSearchVisibleChanged: {
         if (searchVisible) {
             searchOverlayLoader.active = true
@@ -37,6 +60,10 @@ FocusScope {
             }
             searchOverlayLoader.active = false
         }
+    }
+
+    ColorMapping {
+        id: colorMapping
     }
 
     Connections {
@@ -381,13 +408,14 @@ FocusScope {
             background: "#f5f5f5",
             primary: "#f0f0f0",
             secondary: "#c1c1c1",
-            text: "#333333",
+            text: "#a8a8a6",
+            textgamedetails: "#333333",
             textSelected: "#000000",
             buttomText: "#333333",
             bordercolor: "#c0c0c0",
             gridviewborder: "#424242",
             settingsText: "#333333",
-            iconColor: "#555555",
+            iconColor: "#a8a8a6",
             favoriteiconColor: "#d00003",
             gradientColor: "#e8e8e8"
         },
@@ -396,6 +424,7 @@ FocusScope {
             primary: "#1d1d1d",
             secondary: "#363636",
             text: "#a8a8a6",
+            textgamedetails: "#a8a8a6",
             textSelected: "white",
             buttomText: "white",
             bordercolor: "#a8a8a6",
@@ -572,11 +601,44 @@ FocusScope {
     }
 
     Rectangle {
+        id: backgroundGradient
+        anchors.fill: parent
+        z: -1
+
+        gradient: Gradient {
+            GradientStop {
+                id: systemStop
+                position: root.gradientSystemOnTop ? 0.0 : 1.0
+                color: root.colorWithOpacity(root.rawSystemColor, root.systemColorOpacity)
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 200
+                        easing.type: Easing.OutQuad
+                    }
+                }
+            }
+            GradientStop {
+                id: themeStop
+                position: root.gradientSystemOnTop ? 1.0 : 0.3
+                color: root.colorWithOpacity(root.rawThemeColor, root.themeColorOpacity)
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 200
+                        easing.type: Easing.OutQuad
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
         id: conteiner
         property alias conteiner: conteiner
         width: parent.width
         height: parent.height * 0.92
-        color: currentTheme.background
+        color: "transparent"
         visible: true
         x: root.isGameInfoOpen ? -parent.width : 0
 
@@ -793,7 +855,7 @@ FocusScope {
 
     Rectangle{
         id: bottomBar
-        color: currentTheme.background
+        color:  "transparent"
         anchors.top: conteiner.bottom
         height: parent.height * 0.08
         width: parent.width
