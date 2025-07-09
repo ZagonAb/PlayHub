@@ -25,9 +25,9 @@ FocusScope {
     property alias launchTimer: launchTimer
     property bool focusEnabled: false
     property bool positionRestored: false
-    property real systemColorOpacity: 0.2
+    property real systemColorOpacity: 0.3
     property real themeColorOpacity: 1
-    property bool gradientSystemOnTop: false
+    property bool gradientSystemOnTop: x
 
     property color rawSystemColor: {
         if (collectionListView.currentShortName) {
@@ -39,7 +39,13 @@ FocusScope {
     property color rawThemeColor: currentTheme.background
 
     function colorWithOpacity(baseColor, opacity) {
-        return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, opacity);
+        var adjustedOpacity = Math.max(0.1, Math.min(1.0, opacity));
+        return Qt.rgba(
+            baseColor.r * adjustedOpacity + (1 - adjustedOpacity) * 0.1,
+                       baseColor.g * adjustedOpacity + (1 - adjustedOpacity) * 0.1,
+                       baseColor.b * adjustedOpacity + (1 - adjustedOpacity) * 0.1,
+                       1.0
+        );
     }
 
     Connections {
@@ -606,6 +612,8 @@ FocusScope {
         z: -1
 
         gradient: Gradient {
+            orientation: Gradient.Vertical
+
             GradientStop {
                 id: systemStop
                 position: root.gradientSystemOnTop ? 0.0 : 1.0
@@ -613,11 +621,29 @@ FocusScope {
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 200
-                        easing.type: Easing.OutQuad
+                        duration: 300
+                        easing.type: Easing.OutCubic
                     }
                 }
             }
+
+            GradientStop {
+                position: root.gradientSystemOnTop ? 0.3 : 0.7
+                color: Qt.rgba(
+                    (root.rawSystemColor.r * root.systemColorOpacity + root.rawThemeColor.r * root.themeColorOpacity) / 2,
+                               (root.rawSystemColor.g * root.systemColorOpacity + root.rawThemeColor.g * root.themeColorOpacity) / 2,
+                               (root.rawSystemColor.b * root.systemColorOpacity + root.rawThemeColor.b * root.themeColorOpacity) / 2,
+                               (root.systemColorOpacity + root.themeColorOpacity) / 2
+                )
+
+                Behavior on color {
+                    ColorAnimation {
+                        duration: 300
+                        easing.type: Easing.OutCubic
+                    }
+                }
+            }
+
             GradientStop {
                 id: themeStop
                 position: root.gradientSystemOnTop ? 1.0 : 0.3
@@ -625,8 +651,8 @@ FocusScope {
 
                 Behavior on color {
                     ColorAnimation {
-                        duration: 200
-                        easing.type: Easing.OutQuad
+                        duration: 300
+                        easing.type: Easing.OutCubic
                     }
                 }
             }
