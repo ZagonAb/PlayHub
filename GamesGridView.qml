@@ -388,7 +388,7 @@ GridView {
                     Image {
                         id: noImage
                         visible: gameImage.status !== Image.Ready
-                        source: isSelected ? "assets/no-image/no-image-white.png" : "assets/no-image/no-image-black.png"
+                        source: isSelected ? "assets/.no-image/no-image-white.png" : "assets/.no-image/no-image-black.png"
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
                         width: parent.width * 0.60

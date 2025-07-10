@@ -78,10 +78,66 @@ Item {
             anchors.top: parent.top
 
             Image {
+                id: backgroundBlurImage
+                anchors.fill: parent
+                source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/.no-image/no_screenshot.png"
+                fillMode: Image.PreserveAspectCrop
+                mipmap: true
+                visible: false
+                asynchronous: true
+            }
+
+            FastBlur {
+                id: backgroundBlur
+                anchors.fill: parent
+                source: backgroundBlurImage
+                radius: 60
+                opacity: 0.6
+
+                transform: Scale {
+                    origin.x: backgroundBlur.width / 2
+                    origin.y: backgroundBlur.height / 2
+                    xScale: -1
+                }
+            }
+
+            LinearGradient {
+                id: leftEdgeGradient
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width * 0.15
+                start: Qt.point(0, 0)
+                end: Qt.point(width, 0)
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "black" }
+                    GradientStop { position: 0.7; color: "#40000000" }
+                    GradientStop { position: 1.0; color: "#00000000" }
+                }
+            }
+
+            LinearGradient {
+                id: rightEdgeGradient
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                width: parent.width * 0.15
+                start: Qt.point(width, 0)
+                end: Qt.point(0, 0)
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "black" }
+                    GradientStop { position: 0.7; color: "#40000000" }
+                    GradientStop { position: 1.0; color: "#00000000" }
+                }
+            }
+
+            Image {
                 id: backgroundImage
                 anchors.fill: parent
-                source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/no-image/defaultimage.png"
-                fillMode: Image.Stretch
+                source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/.no-image/no_screenshot.png"
+                fillMode: Image.PreserveAspectFit
                 mipmap: true
                 visible: false
                 asynchronous: true
@@ -89,17 +145,33 @@ Item {
 
             ShaderEffect {
                 id: scanDotEffect
-                anchors.fill: parent
+                anchors.centerIn: parent
+                width: {
+                    if (backgroundImage.status === Image.Ready) {
+                        var imgRatio = backgroundImage.sourceSize.width / backgroundImage.sourceSize.height;
+                        var containerRatio = parent.width / parent.height;
+                        return imgRatio > containerRatio ? parent.width : parent.height * imgRatio;
+                    }
+                    return parent.width;
+                }
+                height: {
+                    if (backgroundImage.status === Image.Ready) {
+                        var imgRatio = backgroundImage.sourceSize.width / backgroundImage.sourceSize.height;
+                        var containerRatio = parent.width / parent.height;
+                        return imgRatio > containerRatio ? parent.width / imgRatio : parent.height;
+                    }
+                    return parent.height;
+                }
+
                 property variant source: backgroundImage
                 property real scanOpacity: 0.3
                 property real dotSpacing: 2.0
-
+                visible: false
                 fragmentShader: "
                 uniform sampler2D source;
                 uniform lowp float scanOpacity;
                 uniform highp float dotSpacing;
                 varying highp vec2 qt_TexCoord0;
-
                 void main() {
                 vec4 baseColor = texture2D(source, qt_TexCoord0);
                 highp vec2 pix = gl_FragCoord.xy;
@@ -112,13 +184,34 @@ Item {
             }
             "
             }
+
+            LinearGradient {
+                id: fadeGradient
+                anchors.fill: scanDotEffect
+                visible: false
+                start: Qt.point(0, 0)
+                end: Qt.point(scanDotEffect.width, 0)
+
+                gradient: Gradient {
+                    GradientStop { position: 0.0; color: "#00000000" }
+                    GradientStop { position: 0.1; color: "#FF000000" }
+                    GradientStop { position: 0.9; color: "#FF000000" }
+                    GradientStop { position: 1.0; color: "#00000000" }
+                }
+            }
+
+            OpacityMask {
+                anchors.fill: scanDotEffect
+                source: scanDotEffect
+                maskSource: fadeGradient
+            }
         }
 
         Image {
             id: defaultImage
             anchors.fill: parent
             fillMode: Image.PreserveAspectCrop
-            source: "assets/no-image/defaultimage.png"
+            source: "assets/.no-image/no_screenshot.png"
             mipmap: true
             visible: backgroundImage.status === Image.Error
             asynchronous: true
@@ -156,7 +249,7 @@ Item {
                     anchors.centerIn: parent
                     width: parent.width * 0.8
                     height: parent.height * 0.5
-                    source: game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/no-image/defaultimage.png"
+                    source: game && game.assets && game.assets.boxFront ? game.assets.boxFront : "assets/.no-image/defaultimage.png"
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     layer.enabled: true
@@ -173,7 +266,7 @@ Item {
                     anchors.centerIn: parent
                     width: parent.width * 0.8
                     height: parent.height * 0.5
-                    source: "assets/no-image/defaultimage.png"
+                    source: "assets/.no-image/defaultimage.png"
                     fillMode: Image.PreserveAspectFit
                     asynchronous: true
                     visible: boxArt.status === Image.Error
