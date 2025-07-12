@@ -146,10 +146,22 @@ ListView {
                             id: screenImage
                             anchors.fill: parent
                             anchors.margins: 5
-                            source: model.assets.screenshot || "assets/nofound.png"
+                            source: model.assets.screenshot || "assets/.no-image/no_screenshot.png"
                             fillMode: Image.Stretch
                             mipmap: true
-                            asynchronous : true
+                            asynchronous: true
+                            cache: true
+                            visible: false
+                        }
+
+                        Image {
+                            id: noScreenshotImage
+                            anchors.fill: parent
+                            anchors.margins: 5
+                            source: "assets/.no-image/no_screenshot.png"
+                            fillMode: Image.Stretch
+                            mipmap: true
+                            asynchronous: true
                             cache: true
                             visible: false
                         }
@@ -163,23 +175,92 @@ ListView {
                             visible: false
                         }
 
-                        Text {
-                            visible: model.assets.screenshot === "" || !model.assets.screenshot
-                            text: "NO IMAGE"
-                            anchors.centerIn: parent
-                            font.pixelSize: 16
-                            font.bold: true
-                            color: "#666666"
-                        }
-
                         OpacityMask {
-                            id: maskedImage
+                            id: maskedScreenshot
                             width: screenImage.width
                             height: screenImage.height
                             anchors.centerIn: parent
                             source: screenImage
                             maskSource: roundedMask
-                            visible: screenImage.status === Image.Ready
+                            visible: screenImage.status === Image.Ready && screenImage.source.toString() !== ""
+                        }
+
+                        OpacityMask {
+                            id: maskedNoScreenshot
+                            width: noScreenshotImage.width
+                            height: noScreenshotImage.height
+                            anchors.centerIn: parent
+                            source: noScreenshotImage
+                            maskSource: roundedMask
+                            visible: (screenImage.status === Image.Ready && screenImage.source.toString() === "") ||
+                            (screenImage.status === Image.Error)
+                        }
+
+                        Item {
+                            id: logoContainer
+                            anchors {
+                                bottom: parent.bottom
+                                bottomMargin: 15
+                                horizontalCenter: parent.horizontalCenter
+                            }
+                            width: parent.width * 0.7
+                            height: width * 0.25
+
+                            property real targetScale: isCurrentItem ? 1.1 : 1.0
+                            property real targetOpacity: isCurrentItem ? 1.0 : 0.8
+                            property real glowRadius: isCurrentItem ? 8 : 0
+
+                            transform: Scale {
+                                origin.x: logoContainer.width / 2
+                                origin.y: logoContainer.height / 2
+                                xScale: logoContainer.targetScale
+                                yScale: logoContainer.targetScale
+                            }
+
+                            Image {
+                                id: logoImage
+                                anchors.centerIn: parent
+                                width: parent.width
+                                height: parent.height
+                                source: model.assets.logo || ""
+                                fillMode: Image.PreserveAspectFit
+                                mipmap: true
+                                asynchronous: true
+                                cache: true
+                                visible: status === Image.Ready && source.toString() !== ""
+                                opacity: logoContainer.targetOpacity
+
+                                layer.enabled: true
+                                layer.effect: Glow {
+                                    id: logoGlow
+                                    radius: logoContainer.glowRadius * 0.5
+                                    samples: 16
+                                    color: Qt.rgba(1, 1, 1, 0.7)
+                                    spread: 0.3
+                                    transparentBorder: true
+                                }
+                            }
+
+                            Behavior on targetScale {
+                                NumberAnimation {
+                                    duration: 150
+                                    easing.type: Easing.OutQuad
+                                }
+                            }
+
+                            Behavior on targetOpacity {
+                                NumberAnimation {
+                                    duration: 150
+                                    easing.type: Easing.OutQuad
+                                }
+                            }
+
+                            Behavior on glowRadius {
+                                NumberAnimation {
+                                    duration: 150
+                                    easing.type: Easing.OutQuad
+                                }
+                            }
                         }
                     }
                 }

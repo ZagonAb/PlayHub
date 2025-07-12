@@ -421,7 +421,8 @@ FocusScope {
             bordercolor: "#c0c0c0",
             gridviewborder: "#424242",
             settingsText: "#333333",
-            iconColor: "#a8a8a6",
+            iconColor: "#f0f0f0",
+            settingsiconcolor: "#a8a8a6",
             favoriteiconColor: "#d00003",
             gradientColor: "#e8e8e8"
         },
@@ -436,7 +437,8 @@ FocusScope {
             bordercolor: "#a8a8a6",
             gridviewborder: "#b1b1b1",
             settingsText: "#a8a8a6",
-            iconColor: "#a8a8a6",
+            iconColor: "#f0f0f0",
+            settingsiconcolor: "#a8a8a6",
             favoriteiconColor: "#d00003",
             gradientColor: "#141618"
         }
@@ -739,7 +741,7 @@ FocusScope {
                     anchors.fill: settingsIcon
                     anchors.margins: parent.width * 0.15
                     source: settingsIcon
-                    color: currentTheme.iconColor
+                    color: currentTheme.settingsiconcolor
                     visible: true
                     cached: true
                     Behavior on color {

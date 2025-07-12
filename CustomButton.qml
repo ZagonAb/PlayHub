@@ -219,7 +219,7 @@ Item {
         border.color: borderColor
         border.width: borderWidth
         radius: buttonRoot.radius
-        antialiasing: true
+        opacity: 0.8
 
         Behavior on color {
             ColorAnimation { duration: buttonRoot.animationDuration }
@@ -235,7 +235,7 @@ Item {
         border.color: borderColor
         border.width: 2
         opacity: 0
-        scale: 0.8
+        scale: 0.7
         visible: showFocusRing && (buttonRoot.activeFocus || isSelected)
         antialiasing: true
     }
@@ -277,7 +277,7 @@ Item {
             ColorOverlay {
                 anchors.fill: buttonIcon
                 source: buttonIcon
-                color: currentTheme ? currentTheme.iconColor : "white"
+                color: currentTheme ? currentTheme.iconColor : "blue"
                 visible: buttonIcon.visible
             }
         }
