@@ -2,7 +2,7 @@
 
 - A simple and minimalist interface for pegasus frontend.
 
-> ⚠️ The theme will be subject to future updates with the intention of improving the user experience.
+> 📢 No more updates for now, but if you have any suggestions, they're very welcome!
 
 # Screenshots
 
