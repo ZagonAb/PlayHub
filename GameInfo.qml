@@ -340,7 +340,7 @@ Item {
                                 text: "Launch"
                                 iconSource: "assets/icons/launch.svg"
                                 backgroundColor: currentTheme.primary
-                                textColor: currentTheme.buttomText
+                                textColor: currentTheme.textbutton
                                 borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 0
@@ -363,7 +363,7 @@ Item {
                                 dynamicText: isFavorite ? "Favorite ON" : "Favorite OFF"
                                 iconSource: isFavorite ? "assets/icons/heart-filled.svg" : "assets/icons/heart-outline.svg"
                                 backgroundColor: currentTheme.primary
-                                textColor: currentTheme.buttomText
+                                textColor: currentTheme.textbutton
                                 borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 1
@@ -452,7 +452,7 @@ Item {
                                 }
                                 iconSource: "assets/icons/play.svg"
                                 backgroundColor: currentTheme.primary
-                                textColor: currentTheme.buttomText
+                                textColor: currentTheme.textbutton
                                 borderColor: currentTheme.bordercolor
                                 radius: 10
                                 isSelected: navigationContainer.currentIndex === 2

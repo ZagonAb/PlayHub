@@ -64,9 +64,9 @@ ListView {
             if (index === collectionListView.currentIndex) {
                 return root.width * 0.150;
             } else if (Math.abs(index - collectionListView.currentIndex) === 1) {
-                return root.width * 0.075;
+                return root.width * 0.080;
             } else {
-                return root.width * 0.070;
+                return root.width * 0.080;
             }
         }
         height: collectionListView.height
