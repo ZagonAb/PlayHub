@@ -697,7 +697,6 @@ FocusScope {
                 cursorShape: Qt.PointingHandCursor
                 z: 100
                 onClicked: {
-                    //console.log("MouseArea clicked!")
                     if (!settingsImage.animatingTheme) {
                         settingsImage.animateThemeChange()
                     }
@@ -806,18 +805,15 @@ FocusScope {
                     script: {
                         iconRotation.angle = 0
                         settingsImage.animatingTheme = false
-                        //console.log("Animation completed, animatingTheme:", settingsImage.animatingTheme)
                     }
                 }
             }
 
             function animateThemeChange() {
                 if (!animatingTheme) {
-                    //console.log("Starting animation, animatingTheme:", animatingTheme)
                     animatingTheme = true
                     themeChangeAnimation.start()
                 } else {
-                    //console.log("Animation already running, ignoring")
                 }
             }
 

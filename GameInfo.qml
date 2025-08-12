@@ -80,7 +80,7 @@ Item {
             Image {
                 id: backgroundBlurImage
                 anchors.fill: parent
-                source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/.no-image/no_screenshot.png"
+                source: getBestImageSource(game)
                 fillMode: Image.PreserveAspectCrop
                 mipmap: true
                 visible: false
@@ -136,7 +136,7 @@ Item {
             Image {
                 id: backgroundImage
                 anchors.fill: parent
-                source: game && game.assets && game.assets.screenshot ? game.assets.screenshot : "assets/.no-image/no_screenshot.png"
+                source: getBestImageSource(game)
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
                 visible: false
@@ -789,5 +789,16 @@ Item {
                 easing.type: Easing.OutQuad
             }
         }
+    }
+
+    function getBestImageSource(game) {
+        if (game && game.assets) {
+            if (game.assets.background && game.assets.background.toString() !== "") {
+                return game.assets.background;
+            } else if (game.assets.screenshot && game.assets.screenshot.toString() !== "") {
+                return game.assets.screenshot;
+            }
+        }
+        return "assets/.no-image/no_screenshot.png";
     }
 }

@@ -57,6 +57,8 @@ GridView {
     delegate: Rectangle {
         id: rectanglegridview
         property bool isSelected: GridView.isCurrentItem && gameGridView.activeFocus
+        property bool hasScreenshot: model.assets.screenshot && model.assets.screenshot.toString() !== ""
+        property bool hasLogo: model.assets.logo && model.assets.logo.toString() !== ""
 
         width: gameGridView.cellWidth
         height: gameGridView.cellHeight
@@ -88,7 +90,7 @@ GridView {
                     Image {
                         id: gameImage
                         visible: false
-                        source: model.assets.screenshot || ""
+                        source: hasScreenshot ? model.assets.screenshot : ""
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         width: parent.width * 0.93
@@ -117,7 +119,7 @@ GridView {
                         anchors.centerIn: parent
                         source: gameImage
                         maskSource: roundedMask
-                        visible: gameImage.status === Image.Ready
+                        visible: hasScreenshot && gameImage.status === Image.Ready
                         scale: isSelected && gameGridView.focus ? 1.04 : 1.0
 
                         Behavior on scale {
@@ -131,7 +133,7 @@ GridView {
                             }
                         }
 
-                        layer.enabled: isSelected
+                        layer.enabled: isSelected && hasScreenshot
                         layer.effect: Glow {
                             samples: 100
                             color: root.currentTheme.gridviewborder
@@ -151,14 +153,15 @@ GridView {
 
                     Image {
                         id: gameLogo
-                        source: model.assets.logo || ""
+                        source: hasLogo ? model.assets.logo : ""
                         fillMode: Image.PreserveAspectFit
                         asynchronous: true
                         width: parent.width * 0.8
                         height: parent.height * 0.3
                         anchors.centerIn: parent
-                        opacity: gameImage.status === Image.Ready ? (isSelected ? 1.0 : 0.7) : 0
-                        visible: opacity > 0
+                        opacity: (hasScreenshot ? (gameImage.status === Image.Ready ? (isSelected ? 1.0 : 0.7) : 0) : 
+                                (hasLogo ? (isSelected ? 1.0 : 0.7) : 0))
+                        visible: opacity > 0 && hasLogo
                         mipmap: true
                         cache: true
                         sourceSize.width: width
@@ -387,7 +390,7 @@ GridView {
 
                     Image {
                         id: noImage
-                        visible: gameImage.status !== Image.Ready
+                        visible: !hasScreenshot && !hasLogo
                         source: isSelected ? "assets/.no-image/no-image-white.png" : "assets/.no-image/no-image-black.png"
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
