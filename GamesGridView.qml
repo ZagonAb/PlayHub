@@ -59,6 +59,8 @@ GridView {
         property bool isSelected: GridView.isCurrentItem && gameGridView.activeFocus
         property bool hasScreenshot: model.assets.screenshot && model.assets.screenshot.toString() !== ""
         property bool hasLogo: model.assets.logo && model.assets.logo.toString() !== ""
+        property bool isLoading: (hasScreenshot && gameImage.status !== Image.Ready) ||
+        (hasLogo && gameLogo.status !== Image.Ready)
 
         width: gameGridView.cellWidth
         height: gameGridView.cellHeight
@@ -86,6 +88,31 @@ GridView {
 
                 Item {
                     anchors.fill: parent
+
+                    Item {
+                        id: spinnerContainer
+                        anchors.centerIn: parent
+                        width: parent.width * 0.2
+                        height: width
+                        visible: isLoading && (hasScreenshot || hasLogo)
+                        z: 100
+
+                        Image {
+                            id: spinnerImage
+                            anchors.fill: parent
+                            source: "assets/icons/spinner.svg"
+                            fillMode: Image.PreserveAspectFit
+                            mipmap: true
+
+                            RotationAnimation on rotation {
+                                from: 0
+                                to: 360
+                                duration: 1000
+                                loops: Animation.Infinite
+                                running: spinnerContainer.visible
+                            }
+                        }
+                    }
 
                     Image {
                         id: gameImage
@@ -390,7 +417,8 @@ GridView {
 
                     Image {
                         id: noImage
-                        visible: !hasScreenshot && !hasLogo
+                        //visible: !hasScreenshot && !hasLogo
+                        visible: !hasScreenshot && !hasLogo && !isLoading
                         source: isSelected ? "assets/.no-image/no-image-white.png" : "assets/.no-image/no-image-black.png"
                         anchors.centerIn: parent
                         fillMode: Image.PreserveAspectFit
