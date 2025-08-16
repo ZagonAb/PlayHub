@@ -417,7 +417,6 @@ GridView {
 
                     Image {
                         id: noImage
-                        //visible: !hasScreenshot && !hasLogo
                         visible: !hasScreenshot && !hasLogo && !isLoading
                         source: isSelected ? "assets/.no-image/no-image-white.png" : "assets/.no-image/no-image-black.png"
                         anchors.centerIn: parent
