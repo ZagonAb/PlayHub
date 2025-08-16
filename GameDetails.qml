@@ -85,7 +85,7 @@ Item {
                 id: detailsColumn
                 width: parent.width - 40
                 anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 10
+                spacing: root.width * 0.02
                 anchors.topMargin: 10
 
                 Text {
@@ -105,7 +105,7 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        height: gameDetails.height * 0.07
+                        Layout.preferredHeight: gameDetails.height * 0.08
                         color: currentTheme.background
                         opacity: 1.0
                         border.color: currentTheme.bordercolor
@@ -120,7 +120,7 @@ Item {
                             Text {
                                 text: "GENRE"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -158,7 +158,7 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        height: gameDetails.height * 0.07
+                        Layout.preferredHeight: gameDetails.height * 0.08
                         color: currentTheme.background
                         opacity: 1.0
                         border.color: currentTheme.bordercolor
@@ -173,7 +173,7 @@ Item {
                             Text {
                                 text: "RELEASE DATE"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -191,7 +191,7 @@ Item {
 
                     Rectangle {
                         Layout.fillWidth: true
-                        height: gameDetails.height * 0.07
+                        Layout.preferredHeight: gameDetails.height * 0.08
                         color: currentTheme.background
                         opacity: 1.0
                         border.color: currentTheme.bordercolor
@@ -206,7 +206,7 @@ Item {
                             Text {
                                 text: "RATING"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -226,11 +226,12 @@ Item {
                 Rectangle {
                     id: descriptionContainer
                     Layout.fillWidth: true
-                    Layout.preferredHeight: gameDetails.height * 0.5
+                    Layout.preferredHeight: gameDetails.height * 0.4
                     color: Qt.rgba(0, 0, 0, 0.3)
                     radius: 5
                     border.color: currentTheme.textgamedetails
                     border.width: 1
+                    clip: true
 
                     layer.enabled: true
                     layer.effect: OpacityMask {
@@ -338,7 +339,7 @@ Item {
                             Text {
                                 text: "DEVELOPER"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -373,7 +374,7 @@ Item {
                             Text {
                                 text: "PUBLISHER"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -408,7 +409,7 @@ Item {
                             Text {
                                 text: "LAST PLAYED"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -441,7 +442,7 @@ Item {
                             Text {
                                 text: "PLAY TIME"
                                 color: currentTheme.buttomText
-                                font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                                font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                                 font.bold: true
                                 horizontalAlignment: Text.AlignHCenter
                                 Layout.fillWidth: true
@@ -475,7 +476,7 @@ Item {
                         Text {
                             text: "COLLECTION"
                             color: currentTheme.buttomText
-                            font.pixelSize: Math.min(root.height * 0.015, root.width * 0.02)
+                            font.pixelSize: Math.min(root.height * 0.020, root.width * 0.03)
                             font.bold: true
                             horizontalAlignment: Text.AlignHCenter
                             Layout.fillWidth: true
