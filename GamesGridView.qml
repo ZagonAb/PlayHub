@@ -554,11 +554,18 @@ GridView {
                 }
                 else if (api.keys.isDetails(event)) {
                     event.accepted = true;
-                    soundEffects.play("fav");
                     if (model && currentIndex >= 0 && currentIndex < count) {
                         var game = safeModel.get(currentIndex);
                         if (game && rootItem) {
+                            var wasFavorite = game.favorite;
                             rootItem.toggleFavorite(game);
+
+                            if (wasFavorite) {
+                                soundEffects.play("favoff");
+                            } else {
+                                soundEffects.play("fav");
+                            }
+
                             rootItem.game = game;
                             model = model;
                         }

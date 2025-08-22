@@ -357,6 +357,7 @@ Item {
 
                             CustomButton {
                                 id: favoriteButton
+                                objectName: "favoriteButton"
                                 Layout.preferredWidth: contentWidth + 40
                                 Layout.minimumWidth: 150
                                 Layout.preferredHeight: 50
@@ -415,7 +416,6 @@ Item {
                                 }
 
                                 onClicked: {
-                                    soundEffects.play("fav");
                                     var selectedGame = game;
                                     var collectionName = Utils.getNameCollecForGame(selectedGame, api);
                                     for (var i = 0; i < api.collections.count; ++i) {
@@ -424,8 +424,15 @@ Item {
                                             for (var j = 0; j < collection.games.count; ++j) {
                                                 var currentGame = collection.games.get(j);
                                                 if (currentGame.title === selectedGame.title) {
+                                                    var wasFavorite = currentGame.favorite;
                                                     currentGame.favorite = !currentGame.favorite;
                                                     isFavorite = currentGame.favorite;
+
+                                                    if (wasFavorite) {
+                                                        soundEffects.play("favoff");
+                                                    } else {
+                                                        soundEffects.play("fav");
+                                                    }
                                                     break;
                                                 }
                                             }
@@ -460,7 +467,7 @@ Item {
 
                                 onClicked: {
                                     if (currentGame && currentGame.assets && currentGame.assets.video) {
-                                        soundEffects.play("navi");
+                                        soundEffects.play("go");
                                         navigationContainer.focus = false;
                                         previewButton.isSelected = false;
                                         gameInfoFocused = false;
@@ -686,7 +693,7 @@ Item {
                                     } else {
                                         descriptionButton.isSelected = true;
                                     }
-                                    soundEffects.play("navi");
+                                    soundEffects.play("go");
                                 }
                             }
                         }

@@ -11,6 +11,7 @@ FocusScope {
     property var returnFocusTo: null
     property var gameInfoContainer: null
     property bool enableShaderEffect: true
+    property real savedVolume: 0.5
     property real scanOpacity: 0.3
     property real dotSpacing: 2.0
 
@@ -40,6 +41,8 @@ FocusScope {
     property bool isInitializing: false
 
     function playVideo(source, focusItem, gameInfoRef, logoSource) {
+        loadSavedVolume();
+
         videoSource = source;
         returnFocusTo = focusItem;
         gameInfoContainer = gameInfoRef;
@@ -59,6 +62,20 @@ FocusScope {
             playerContainer.forceActiveFocus();
             root.focusManager.setFocus("mediaplayer", "gameinfo");
         });
+    }
+
+    function loadSavedVolume() {
+        var storedVolume = api.memory.get('mediaPlayerVolume');
+        if (storedVolume !== undefined) {
+            volumeSlider.value = storedVolume;
+        } else {
+            volumeSlider.value = 0.5;
+        }
+        isMuted = (volumeSlider.value === 0);
+    }
+
+    function saveVolume() {
+        api.memory.set('mediaPlayerVolume', volumeSlider.value);
     }
 
     Timer {
@@ -130,6 +147,12 @@ FocusScope {
             id: mediaPlayer
             autoPlay: true
             volume: isMuted ? 0.0 : volumeSlider.value
+
+            onVolumeChanged: {
+                if (!isInitializing) {
+                    saveVolume();
+                }
+            }
 
             onStopped: {
                 if (status === MediaPlayer.EndOfMedia) {
@@ -545,11 +568,13 @@ FocusScope {
                             if (pressed) {
                                 var newValue = Math.max(0, Math.min(1, mouseX / width))
                                 parent.value = newValue
+                                saveVolume();
                             }
                         }
                         onClicked: {
                             var newValue = Math.max(0, Math.min(1, mouseX / width))
                             parent.value = newValue
+                            saveVolume();
                         }
                     }
                 }
@@ -640,12 +665,14 @@ FocusScope {
                         soundEffects.play("navi");
                         showControlsTemporarily();
                         volumeSlider.value = Math.min(1.0, volumeSlider.value + 0.1);
+                        saveVolume();
                         break;
                     case Qt.Key_Down:
                         event.accepted = true;
                         soundEffects.play("navi");
                         showControlsTemporarily();
                         volumeSlider.value = Math.max(0.0, volumeSlider.value - 0.1);
+                        saveVolume();
                         break;
                     default:
                         event.accepted = false;

@@ -7,7 +7,7 @@ Item {
     SoundEffect {
         id: naviSound
         source: "assets/audio/choose.wav"
-        volume: 0.8
+        volume: 0.3
     }
 
     SoundEffect {
@@ -25,13 +25,19 @@ Item {
     SoundEffect {
         id: launchSound
         source: "assets/audio/launch.wav"
-        volume: 1.0
+        volume: 0.3
     }
 
     SoundEffect {
         id: favSound
         source: "assets/audio/Fav.wav"
-        volume: 0.7
+        volume: 0.3
+    }
+
+    SoundEffect {
+        id: favOffSound
+        source: "assets/audio/FavOff.wav"
+        volume: 0.3
     }
 
     function play(soundName) {
@@ -41,6 +47,7 @@ Item {
             case "go": goSound.play(); break;
             case "launch": launchSound.play(); break;
             case "fav": favSound.play(); break;
+            case "favoff": favOffSound.play(); break;
         }
     }
 }

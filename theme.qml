@@ -1052,9 +1052,31 @@ FocusScope {
                 for (var j = 0; j < collection.games.count; ++j) {
                     var currentGame = collection.games.get(j);
                     if (currentGame.title === game.title) {
+                        var wasFavorite = currentGame.favorite;
                         currentGame.favorite = !currentGame.favorite;
-                        if (gameInfo.currentGame && gameInfo.currentGame.title === game.title) {
-                            gameInfo.favoriteButton.isFavorite = currentGame.favorite;
+
+                        if (wasFavorite) {
+                            soundEffects.play("favoff");
+                        } else {
+                            soundEffects.play("fav");
+                        }
+
+                        if (typeof gameInfo !== "undefined" && gameInfo &&
+                            gameInfo.currentGame && gameInfo.currentGame.title === game.title) {
+                            var navContainer = gameInfo.children[0];
+                            if (navContainer && navContainer.children) {
+                                for (var k = 0; k < navContainer.children.length; k++) {
+                                    var child = navContainer.children[k];
+                                    if (child.objectName === "navigationContainer" ||
+                                        (child.children && child.children.length > 0)) {
+                                        var favoriteBtn = findFavoriteButton(child);
+                                    if (favoriteBtn) {
+                                        favoriteBtn.isFavorite = currentGame.favorite;
+                                        break;
+                                    }
+                                        }
+                                }
+                            }
                         }
                         break;
                     }
@@ -1062,6 +1084,20 @@ FocusScope {
                 break;
             }
         }
+    }
+
+    function findFavoriteButton(parent) {
+        if (!parent || !parent.children) return null;
+
+        for (var i = 0; i < parent.children.length; i++) {
+            var child = parent.children[i];
+            if (child && child.objectName === "favoriteButton") {
+                return child;
+            }
+            var found = findFavoriteButton(child);
+            if (found) return found;
+        }
+        return null;
     }
 
     function showGameInfo() {
